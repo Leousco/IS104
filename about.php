@@ -343,8 +343,8 @@
     <i class="fas fa-ticket-alt"></i> Buy Ticket
   </a>
   
-  <a href="redeem_voucher.php">
-    <i class="fas fa-gift"></i> Redeem Voucher
+  <a href="buyCoin/buy_coins.php">
+        <i class="fas fa-coins"></i> Buy Coins
   </a>
   
   <a href="feedback.php">

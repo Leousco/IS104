@@ -1,15 +1,16 @@
 <?php
-session_start();
 include("../config.php");
+include("../auth.php");
 
-// Check if the user is logged in
+$loginPage = "/SADPROJ/login.php";
+
 if (!isset($_SESSION['UserID'])) {
-    header("Location: ../login.php");
+    header("Location: $loginPage");
     exit();
 }
 
 if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
-    header("Location: login.php?error=unauthorized");
+    header("Location: $loginPage?error=unauthorized");
     exit();
 }
 
@@ -35,6 +36,7 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user_data = $stmt->get_result()->fetch_assoc();
 $current_balance = $user_data['balance'] ?? 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -345,7 +347,7 @@ h1 {
 <div id="sidebar" class="sidebar" aria-hidden="true">
   <span class="closebtn" onclick="closeNav()">&times;</span>
   <a href="../passenger_dashboard.php"><i class="fas fa-home"></i> Homepage</a>
-  <a href="../vehiclePage/vehicle.php"><i class="fas fa-bus"></i> Vehicles</a>
+  <a href="../vehicle.php"><i class="fas fa-bus"></i> Vehicles</a>
   <a href="../ticketing/ticketing.php"><i class="fas fa-ticket-alt"></i> Buy Ticket</a>
   <a href="buy_coins.php"><i class="fas fa-coins"></i> Buy Coins</a>
   <a href="../feedback.php"><i class="fas fa-comment-dots"></i> Feedback</a>
@@ -364,12 +366,16 @@ h1 {
 <header>
   <div class="menu" onclick="openNav()">☰</div>
   <div class="right-header">
-    <div class="coin-balance">
-      <i class="fas fa-coins coin-icon"></i>
-      <span id="header-balance"><?= number_format($current_balance) ?></span>
-    </div>
-    <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
-  </div>
+            <a href="buy_coins.php" class="coin-balance">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#F4C542"/>
+                    <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
+                    <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
+                </svg>
+                <span id="header-balance">₱<?= number_format($current_balance, 2) ?></span>
+            </a>
+            <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
+        </div>
 </header>
 
 <div class="container">
@@ -436,6 +442,21 @@ h1 {
 </div>
 
 <script>
+  async function renderUserBalance() {
+    const hb = document.getElementById('header-balance');
+    hb.textContent = '...';
+    try {
+        const res = await fetch('../get_passenger_data.php');
+        const data = await res.json();
+        if (data.success) {
+            const balance = parseFloat(data.user.balance || 0).toFixed(2);
+            hb.textContent = '₱' + balance;
+        } else hb.textContent = 'Err';
+    } catch {
+        hb.textContent = 'Err';
+    }
+}
+
 function openNav() {
   const sidebar = document.getElementById("sidebar");
   sidebar.style.width = "280px";

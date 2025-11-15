@@ -1,5 +1,19 @@
 <?php
-require_once "../config.php";
+include("../config.php");
+include("../auth.php");
+$loginPage = "/SADPROJ/login.php";
+
+// Only allow logged-in users
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+// Optional: role-based protection
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
 
 // Handle Approve/Reject actions (AJAX)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'])) {
@@ -218,7 +232,7 @@ main {
     <a href="Analytics.php"><i class="fas fa-chart-line"></i> Analytics</a>
     <a href="admin_bugreport.php"><i class="fas fa-bug"></i> User Report</a>
     <a href="user_management.php"><i class="fas fa-users-cog"></i> User Management</a>
-    <a href="Voucher_management.php"><i class="fas fa-ticket-alt"></i> Voucher Management</a>
+    <a href="coin_deal_management.php"><i class="fas fa-ticket-alt"></i> Coin Deals Management</a>
     <a href="vehicle_management.php"><i class="fas fa-car-side"></i> Vehicle Management</a>
     <a href="schedule_management.php"><i class="fas fa-calendar-alt"></i> Schedule Management</a>
     <a href="route_management.php"><i class="fas fa-route"></i> Routes Management</a>

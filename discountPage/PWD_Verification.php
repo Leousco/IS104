@@ -1,15 +1,23 @@
 <?php
-session_start();
-require_once "../config.php";
+require_once "../config.php"; 
+include("../auth.php");
+
+$loginPage = "/SADPROJ/login.php";
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
+
+$user_id = $_SESSION['UserID'];
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
-if (!isset($_SESSION['UserID'])) {
-    die("Error: You must be logged in to view this page.");
-}
-
-$user_id = (int) $_SESSION['UserID'];
 
 // ✅ Ensure connection works
 if (!isset($conn) || !($conn instanceof mysqli)) {
@@ -176,8 +184,8 @@ $conn->close();
      <i class="fas fa-ticket-alt"></i> Buy Ticket
   </a>
   
-  <a href="../redeem_voucher.php">
-    <i class="fas fa-gift"></i> Redeem Voucher
+  <a href="../buyCoin/buy_coins.php">
+      <i class="fas fa-coins"></i> Buy Coins
   </a>
   
   <a href="../feedback.php">

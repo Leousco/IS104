@@ -1,7 +1,17 @@
 <?php
-session_start();
+include("../config.php");
+include("../auth.php");
+$loginPage = "/SADPROJ/login.php";
+
+// Only allow logged-in users
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+// Optional: role-based protection
 if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
-    header("Location: ../login.php?error=unauthorized");
+    header("Location: $loginPage?error=unauthorized");
     exit();
 }
 ?>

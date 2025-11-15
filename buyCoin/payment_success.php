@@ -161,7 +161,7 @@ try {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -243,7 +243,7 @@ try {
             font-size: 20px;
         }
         .detail-value.balance {
-            color: #667eea;
+            color: #16a34a;
             font-size: 24px;
         }
         .email-status {
@@ -260,7 +260,7 @@ try {
         }
         .btn {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
             color: white;
             padding: 14px 40px;
             border-radius: 10px;
@@ -271,7 +271,7 @@ try {
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
         }
     </style>
 </head>

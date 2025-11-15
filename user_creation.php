@@ -238,7 +238,26 @@ $conn->close();
     text-align: center;
   }
   .popup-message.success { background-color: #FFD700; color: #000000; } 
-  .popup-message.error { background-color: #FF4500; color: #ffffff; } 
+  .popup-message.error { background-color: #FF4500; color: #ffffff; }
+
+  .bottom-text { 
+    font-size: 0.85rem; 
+    text-align: center; 
+    color: #446a2b; 
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+  
+  .bottom-text a { 
+    color: #4a6274; 
+    font-weight: 700; 
+    text-decoration: none; 
+    cursor: pointer; 
+  }
+  
+  .bottom-text a:hover { 
+    text-decoration: underline; 
+  }
 
 </style>
 </head>
@@ -327,7 +346,7 @@ $conn->close();
         <?php echo isset($_SESSION['generated_code']) ? 'Verify' : 'Register'; ?>
       </button>
 
-      <div class="bottom-text" style="margin-top: 10px; display: flex; justify-content: center;">
+      <div class="bottom-text">
         Already have an account? <a href="login.php">Sign In</a>
       </div>
   </form>

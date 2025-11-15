@@ -1,12 +1,22 @@
 <?php
-session_start();
 require_once "../config.php"; 
+include("../auth.php");
+
+$loginPage = "/SADPROJ/login.php";
 
 if (!isset($_SESSION['UserID'])) {
-    die("Error: You must be logged in to view this page.");
+    header("Location: $loginPage");
+    exit();
 }
 
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
+
+// DO NOT REMOVE
 $user_id = $_SESSION['UserID'];
+// THIS ONE
 
 // ✅ Check if user already submitted a STUDENT application (fixed to category-specific)
 $query = "SELECT * FROM discount_applications WHERE UserID = ? AND Category = 'Student'";
@@ -166,8 +176,8 @@ $conn->close();
      <i class="fas fa-ticket-alt"></i> Buy Ticket
   </a>
   
-  <a href="../redeem_voucher.php">
-    <i class="fas fa-gift"></i> Redeem Voucher
+  <a href="../buyCoin/buy_coins.php">
+      <i class="fas fa-coins"></i> Buy Coins
   </a>
   
   <a href="../feedback.php">

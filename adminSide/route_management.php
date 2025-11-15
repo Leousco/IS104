@@ -1,10 +1,17 @@
 <?php
-session_start();
 include("../config.php");
+include("../auth.php");
+$loginPage = "/SADPROJ/login.php";
 
-// ✅ Access Control
-if (!isset($_SESSION['UserID']) || $_SESSION['Role'] !== "ADMIN") {
-    header("Location: ../login.php?error=unauthorized");
+// Only allow logged-in users
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+// Optional: role-based protection
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
+    header("Location: $loginPage?error=unauthorized");
     exit();
 }
 
@@ -232,7 +239,7 @@ th {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(3px);
   display: none;
   align-items: center;
@@ -334,7 +341,7 @@ main { padding: 20px; animation: slideIn 0.6s ease; }
     <h2 class="text-green-400"><i class="fas fa-grip-vertical"></i> Menu</h2>
     <a href="admin_dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="Analytics.php"><i class="fas fa-chart-line"></i> Analytics</a>
-    <a href="Voucher_management.php"><i class="fas fa-ticket-alt"></i> Voucher Management</a>
+    <a href="coin_deal_management.php"><i class="fas fa-ticket-alt"></i> Coin Deals Management</a>
     <a href="admin_bugreport.php"><i class="fas fa-bug"></i> User Report</a>
     <a href="user_management.php"><i class="fas fa-users-cog"></i> User Management</a>
     <a href="vehicle_management.php"><i class="fas fa-car-side"></i> Vehicle Management</a>

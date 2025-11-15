@@ -1,10 +1,23 @@
 <?php
-session_start(); // ✅ Required for using $_SESSION
-include 'config.php';
+include("config.php");
+include("auth.php");
 
-// Handle feedback form submission
+$loginPage = "/SADPROJ/login.php";
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
+
+
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Replace with actual session PassengerID when login is implemented
+    
     $passengerID = 1; 
     $message = mysqli_real_escape_string($conn, $_POST['message']);
 
@@ -221,7 +234,7 @@ $result = $conn->query($query);
     font-size: 15px; 
     color: #333; 
     background-color: #f9f9f9; 
-    resize: vertical; 
+    resize: none; 
     transition: all 0.2s ease-in-out;
     }
 
@@ -419,8 +432,8 @@ $result = $conn->query($query);
         <i class="fas fa-ticket-alt"></i> Buy Ticket
       </a>
       
-      <a href="redeem_voucher.php">
-        <i class="fas fa-gift"></i> Redeem Voucher
+      <a href="buyCoin/buy_coins.php">
+        <i class="fas fa-coins"></i> Buy Coins
       </a>
       
       <a href="feedback.php">
@@ -475,7 +488,7 @@ $result = $conn->query($query);
       <form method="POST" action="Feedback.php">
         <label for="message">Your Feedback</label>
 
-        <textarea name="message" id="message" rows="5" required></textarea>
+        <textarea name="message" id="message" rows="5" class=""required></textarea>
 
         <button type="submit">Submit Feedback</button>
       </form>

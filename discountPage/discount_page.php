@@ -1,49 +1,47 @@
 <?php
-session_start();
-include '../config.php';
+include("../config.php");
+include("../auth.php");
+
+$loginPage = "/SADPROJ/login.php";
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
+
+$user_id = $_SESSION['UserID'];
 
 if (!$conn) {
     die("Database connection failed. Please check your config.php.");
 }
 
-// Ensure user is logged in
-if (!isset($_SESSION['UserID'])) {
-    die("You must be logged in to access this page.");
-}
-
-$userID = $_SESSION['UserID'];
-
-// Query to check HasDiscount and get the approved category (if any)
-$hasDiscount = 0;
-$approvedCategory = null;
-
-$sql = "SELECT HasDiscount FROM users WHERE UserID = ?";
+// Check for any active application (Pending or Approved)
+$activeCategory = null;
+$activeStatus = null;
+$sql = "SELECT Category, Status FROM discount_applications 
+        WHERE UserID = ? AND Status IN ('Pending','Approved') LIMIT 1";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $userID);
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$hasDiscount = $user ? $user['HasDiscount'] : 0;
-$stmt->close();
-
-// If HasDiscount = 1, get the approved category
-if ($hasDiscount == 1) {
-    $sql = "SELECT Category FROM discount_applications WHERE UserID = ? AND Status = 'Approved' LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $app = $result->fetch_assoc();
-    $approvedCategory = $app ? $app['Category'] : null;
-    $stmt->close();
+$app = $result->fetch_assoc();
+if ($app) {
+    $activeCategory = $app['Category'];
+    $activeStatus = $app['Status'];
 }
+$stmt->close();
 
 $conn->close();
 
 // Helper function to check if a button should be disabled
 function isDisabled($category) {
-    global $hasDiscount, $approvedCategory;
-    return ($hasDiscount == 1 && $approvedCategory !== $category);
+    global $activeCategory;
+    return ($activeCategory && $activeCategory !== $category);
 }
 ?>
 
@@ -57,7 +55,6 @@ function isDisabled($category) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <style>
- /* ... (Your CSS styles here) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -66,10 +63,9 @@ function isDisabled($category) {
         }
 
         body::-webkit-scrollbar {
-    display: none; /* Hides the scrollbar */
-    width: 0; /* Ensures no width space is reserved for the scrollbar */
-    }
-
+            display: none;
+            width: 0;
+        }
 
         header {
             background: linear-gradient(90deg, #2e7d32, #66bb6a);
@@ -84,7 +80,6 @@ function isDisabled($category) {
             z-index: 100;
         }
 
-        /* Right side header controls (coins + profile) matched from passenger_dashboard.php */
         .right-header {
             display: flex;
             align-items: center;
@@ -138,58 +133,78 @@ function isDisabled($category) {
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-    /* SIDEBAR */
-    .sidebar {
-      height: 100%;
-      width: 0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: #1b1b1b;
-      overflow: hidden;
-      transition: 0.4s;
-      padding-top: 60px;
-      z-index: 1000;
-      transition: width 0.3s ease, background 0.3s ease;
-    }
-    .sidebar a {
-      padding: 14px 28px;
-      text-decoration: none;
-      font-size: 18px;
-      color: #ddd;
-      display: block;
-      transition: 0.3s;
-    }
-    .sidebar a i {
-      width: 10px;
-      margin-right: 10px;
-      text-align: center;
-    }
-    .sidebar a:hover {
-      background: #2e7d32;
-      color: #fff;
-      padding-left: 35px;
-    }
-    .sidebar .closebtn {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 30px;
-      cursor: pointer;
-      color: white;
-    }
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #1b1b1b;
+            overflow: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            z-index: 1000;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        .sidebar a {
+            padding: 14px 28px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #ddd;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a i {
+            width: 10px;
+            margin-right: 10px;
+            text-align: center;
+        }
+        .sidebar a:hover {
+            background: #2e7d32;
+            color: #fff;
+            padding-left: 35px;
+        }
+        .sidebar .closebtn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+        }
 
-    /* DISABLED BUTTON STYLING */
-    .disabled-button {
-      opacity: 0.5;
-      cursor: not-allowed;
-      pointer-events: none;  /* Prevents clicks */
-      background: #d3d3d3 !important;  /* Gray background */
-    }
-    .disabled-button:hover {
-      background: #d3d3d3 !important;  /* No hover effect */
-      transform: none !important;
-    }
+        .disabled-button {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #d3d3d3 !important;
+        }
+        .disabled-button:hover {
+            background: #d3d3d3 !important;
+            transform: none !important;
+        }
+
+        .status-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            color: #856404;
+            text-align: center;
+        }
+
+        .status-note.approved {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .status-note.pending {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
   </style>
 </head>
 <body>
@@ -228,9 +243,9 @@ function isDisabled($category) {
       <i class="fas fa-ticket-alt"></i> Buy Ticket
     </a>
     
-    <a href="../redeem_voucher.php">
-      <i class="fas fa-gift"></i> Redeem Voucher
-    </a>
+    <a href="../buyCoin/buy_coins.php">
+        <i class="fas fa-coins"></i> Buy Coins
+      </a>
     
     <a href="../feedback.php">
       <i class="fas fa-comment-dots"></i> Feedback
@@ -248,12 +263,23 @@ function isDisabled($category) {
   <!-- MAIN CONTENT -->
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
     <h1 class="text-2xl font-bold mb-2">APPLY FOR DISCOUNT</h1>
-    <p class="text-gray-600 mb-16 text-center">
+    <p class="text-gray-600 mb-4 text-center">
       Choose the discount category and submit your required ID.
-      <?php if ($hasDiscount == 1): ?>
-        <br><strong>Note: You have an approved discount for "<?php echo htmlspecialchars($approvedCategory); ?>". Other categories are disabled.</strong>
-      <?php endif; ?>
     </p>
+
+    <?php if ($activeCategory): ?>
+      <div class="status-note <?php echo $activeStatus === 'Approved' ? 'approved' : 'pending'; ?> max-w-2xl w-full mb-8">
+        <strong>
+          <?php if ($activeStatus === 'Approved'): ?>
+            <i class="fas fa-check-circle"></i> You have an approved discount for "<?php echo htmlspecialchars($activeCategory); ?>". 
+            Other categories are disabled.
+          <?php else: ?>
+            <i class="fas fa-clock"></i> You have a pending application for "<?php echo htmlspecialchars($activeCategory); ?>". 
+            You cannot apply for another discount until this application is processed.
+          <?php endif; ?>
+        </strong>
+      </div>
+    <?php endif; ?>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
 
@@ -265,8 +291,10 @@ function isDisabled($category) {
           <path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2z" />
         </svg>
         <span class="font-bold text-lg">STUDENT</span>
-        <?php if ($approvedCategory === 'Student'): ?>
+        <?php if ($activeCategory === 'Student' && $activeStatus === 'Approved'): ?>
           <span class="text-green-600 font-semibold">(Approved)</span>
+        <?php elseif ($activeCategory === 'Student' && $activeStatus === 'Pending'): ?>
+          <span class="text-yellow-600 font-semibold">(Pending)</span>
         <?php endif; ?>
       </button>
 
@@ -278,8 +306,10 @@ function isDisabled($category) {
           <path d="M12 4a2 2 0 110-4 2 2 0 010 4zm7.07 9.25l-1.41 1.41L14 11.41V15h-2V9h2l3.66 3.66 1.41-1.41 1.41 1.41z" />
         </svg>
         <span class="font-bold text-lg">PWD (PERSON WITH DISABILITY)</span>
-        <?php if ($approvedCategory === 'PWD'): ?>
+        <?php if ($activeCategory === 'PWD' && $activeStatus === 'Approved'): ?>
           <span class="text-green-600 font-semibold">(Approved)</span>
+        <?php elseif ($activeCategory === 'PWD' && $activeStatus === 'Pending'): ?>
+          <span class="text-blue-600 font-semibold">(Pending)</span>
         <?php endif; ?>
       </button>
 
@@ -291,8 +321,10 @@ function isDisabled($category) {
           <path d="M12 2a2 2 0 110 4 2 2 0 010-4zm2 6h-4v14h2v-6h2v6h2V8z" />
         </svg>
         <span class="font-bold text-lg">SENIOR CITIZEN</span>
-        <?php if ($approvedCategory === 'Senior'): ?>
+        <?php if ($activeCategory === 'Senior' && $activeStatus === 'Approved'): ?>
           <span class="text-green-600 font-semibold">(Approved)</span>
+        <?php elseif ($activeCategory === 'Senior' && $activeStatus === 'Pending'): ?>
+          <span class="text-blue-600 font-semibold">(Pending)</span>
         <?php endif; ?>
       </button>
 
@@ -304,8 +336,10 @@ function isDisabled($category) {
           <path d="M12 2a2 2 0 110 4 2 2 0 010-4zm2 6h-4v14h2v-6h2v6h2V8z" />
         </svg>
         <span class="font-bold text-lg">GOVERNMENT EMPLOYEE</span>
-        <?php if ($approvedCategory === 'Government'): ?>
+        <?php if ($activeCategory === 'Government' && $activeStatus === 'Approved'): ?>
           <span class="text-green-600 font-semibold">(Approved)</span>
+        <?php elseif ($activeCategory === 'Government' && $activeStatus === 'Pending'): ?>
+          <span class="text-blue-600 font-semibold">(Pending)</span>
         <?php endif; ?>
       </button>
 

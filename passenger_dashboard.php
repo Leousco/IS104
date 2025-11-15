@@ -1,10 +1,17 @@
 <?php
-session_start();
-if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
-    header("Location: login.php?error=unauthorized");
+include("auth.php");
+
+$loginPage = "/SADPROJ/login.php";
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
     exit();
 }
 
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
 
 $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0; 
 ?>
@@ -27,9 +34,10 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
     -ms-overflow-style: none;
     }
 
+    /* Hides the scrollbar */
     body::-webkit-scrollbar {
-    display: none; /* Hides the scrollbar */
-    width: 0; /* Ensures no width space is reserved for the scrollbar */
+    display: none; 
+    width: 0; 
     }
 
      .global-map-bg {
@@ -365,8 +373,14 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
         <i class="fas fa-ticket-alt"></i> Buy Ticket
       </a>
       
-      <a href="redeem_voucher.php">
+      <!-- DO NOT REMOVE -->
+      <!-- <a href="redeem_voucher.php">
         <i class="fas fa-gift"></i> Redeem Voucher
+      </a> -->
+      <!-- DO NOT REMOVE - rico -->
+
+      <a href="buyCoin/buy_coins.php">
+        <i class="fas fa-coins"></i> Buy Coins
       </a>
       
       <a href="feedback.php">
@@ -381,9 +395,6 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
         <i class="fas fa-percent"></i> Apply for a Discount
       </a>
 
-      <a href="buyCoin/buy_coins.php">
-        <i class="fas fa-coins"></i> Buy Coins
-      </a>
 
       <div class="sidebar-power">
       <button id="power-toggle">
@@ -400,17 +411,17 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
 
   <header>
      <div class="menu" onclick="openNav()">☰</div>
-    <div class="right-header">
-        <a href="redeem_voucher.php" class="coin-balance">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="#F4C542"/>
-                <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
-                <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
-            </svg>
-            <span id="header-balance">₱0</span>
-        </a>
-        <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
-    </div>
+        <div class="right-header">
+            <a href="buyCoin/buy_coins.php" class="coin-balance">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#F4C542"/>
+                    <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
+                    <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
+                </svg>
+                <span id="header-balance">₱0</span>
+            </a>
+            <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
+        </div>
   </header>
   <div class="slideshow-container" id="slideshow-container" style="display: flex;">
 

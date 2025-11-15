@@ -1,10 +1,17 @@
 <?php
-session_start();
 include("../config.php");
+include("../auth.php");
+$loginPage = "/SADPROJ/login.php";
 
-// ✅ Admin-only access
-if (!isset($_SESSION['UserID']) || $_SESSION['Role'] !== "ADMIN") {
-    header("Location: ../login.php?error=unauthorized");
+// Only allow logged-in users
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+// Optional: role-based protection
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
+    header("Location: $loginPage?error=unauthorized");
     exit();
 }
 
@@ -215,9 +222,7 @@ $stats = $conn->query("
       z-index: 2000;
     }
     .modal-content {
-      width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
+      width: 400px;
       background: #fff;
       border-radius: 8px;
       padding: 20px;
@@ -466,10 +471,10 @@ $stats = $conn->query("
 
       <div class="modal-buttons">
         <button type="submit" class="btn-save">
-          <i class="fas fa-save"></i> Save Deal
+          <i></i> Save Deal
         </button>
         <button type="button" class="btn-cancel" onclick="hideForm()">
-          <i class="fas fa-times"></i> Cancel
+          <i></i> Cancel
         </button>
       </div>
     </form>
