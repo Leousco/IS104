@@ -285,7 +285,7 @@ try {
 
         <?php if ($email_sent): ?>
             <div class="email-status">
-                <i class="fas fa-envelope"></i> Confirmation email has been sent, check yout inbox!
+                <i class="fas fa-envelope"></i> Confirmation email has been sent, check your inbox!
             </div>
         <?php else: ?>
             <div class="email-status error">

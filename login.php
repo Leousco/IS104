@@ -30,6 +30,7 @@ if ($_SESSION['ban_time'] && time() < $_SESSION['ban_time']) {
             $_SESSION['UserID'] = $user['UserID'];
             $_SESSION['Role'] = strtoupper($user['Role']);
             $_SESSION['Name'] = $user['FirstName'];
+            $_SESSION['Email'] = $user['Email'];
 
             if ($remember) {
               setcookie('remember_email', $user['Email'], time() + $rememberMeDuration, "/SADPROJ", "", false, true);
