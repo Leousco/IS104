@@ -1,8 +1,3 @@
-<?php
-
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,6 +209,91 @@
     display: none;
   }
 
+ .hero-section {
+  background: linear-gradient(to right, #2e7d32, #66bb6a);
+  color: white;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.hero-content h2 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.hero-btn {
+  background: white;
+  color: #2e7d32;
+  padding: 12px 30px;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.hero-btn:hover {
+  background: #f1f8e9;
+}
+.features-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 60px 20px;
+  background: #f5f7fa; /* light background for contrast */
+  flex-wrap: wrap;
+}
+
+.feature-card {
+  display: block; /* make the whole card clickable */
+  background: #fff;
+  padding: 30px 25px;
+  border-radius: 14px;
+  text-align: center;
+  width: 280px;
+  text-decoration: none; /* remove underline */
+  color: inherit; /* keep text color consistent */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+}
+
+.feature-card img {
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover img {
+  transform: scale(1.1);
+}
+
+.feature-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #2e7d32; /* Novacore green accent */
+}
+
+.feature-card p {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.4;
+}
+
+
+
   </style>
 </head>
 <body>
@@ -236,8 +316,8 @@
         <i class="fas fa-ticket-alt"></i> Buy Ticket
       </a>
       
-      <a href="buyCoin/buy_coins.php">
-        <i class="fas fa-coins"></i> Buy Coins
+      <a href="redeem_voucher.php">
+        <i class="fas fa-gift"></i> Redeem Voucher
       </a>
       
       <a href="feedback.php">
@@ -283,12 +363,30 @@
 </header>
 
 <!-- HOMEPAGE CONTENT -->
-<div class="container" id="homepage-content">
-  <div class="transport-options">
-    <a href="vehiclePage/Bus.php"><img src="img/bus.jpg"  alt="Bus"><h3>Bus</h3></a>
-    <a href="vehiclePage/ejeep.php"><img src="img/ejeep.png" alt="E-Jeep"><h3>E-Jeep</h3></a>
+ <section class="hero-section">
+  <div class="hero-content">
+    <h2>Smart Urban Mobility Starts Here</h2>
+    <p>Track, tap, and travel with ease. Your journey is just one click away.</p>
   </div>
-</div>
+  
+</section>
+
+
+<section class="features-grid">
+  <a href="vehiclePage/Bus.php" class="feature-card">  
+    <img src="img/bus.jpg" alt="Bus">
+    <h3>Bus</h3>
+    <p>Reliable routes across the city.</p>
+  </a>
+
+  <a href="vehiclePage/ejeep.php" class="feature-card">
+    <img src="img/ejeep.png" alt="E-Jeep">
+    <h3>E-Jeep</h3>
+    <p>Eco-friendly rides for modern commuters.</p>
+  </a>
+</section>
+
+
 
 
 

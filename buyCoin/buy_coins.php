@@ -374,7 +374,7 @@ h1 {
                 </svg>
                 <span id="header-balance">₱<?= number_format($current_balance, 2) ?></span>
             </a>
-            <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
+            <div class="profile" onclick="window.location.href='../user_prof.php'">👤</div>
         </div>
 </header>
 

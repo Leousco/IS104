@@ -1,21 +1,12 @@
 <?php
-include("auth.php");
-
-$loginPage = "/SADPROJ/login.php";
-
-if (!isset($_SESSION['UserID'])) {
-    header("Location: $loginPage");
-    exit();
-}
-
+session_start();
 if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
-    header("Location: $loginPage?error=unauthorized");
+    header("Location: login.php?error=unauthorized");
     exit();
 }
 
 $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0; 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -34,9 +25,8 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
     -ms-overflow-style: none;
     }
 
-    /* Hides the scrollbar */
     body::-webkit-scrollbar {
-    display: none; 
+    display: none; /* Hides the scrollbar */
     width: 0; 
     }
 
@@ -349,15 +339,146 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
     display: none;
   }
 
+  .hero-section {
+  background: linear-gradient(to right, #2e7d32, #66bb6a);
+  color: white;
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.hero-content h2 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.hero-btn {
+  background: white;
+  color: #2e7d32;
+  padding: 12px 30px;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.hero-btn:hover {
+  background: #f1f8e9;
+}
+
+.features-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 60px 20px;
+  background: #f5f7fa;
+}
+
+.feature-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 300px;
+}
+
+.feature-card img {
+  width: 60px;
+  margin-bottom: 20px;
+}
+
+.feature-card h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: #2e7d32;
+}
+
+.main-footer {
+    background: linear-gradient(90deg, #2e7d32, #66bb6a);
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  margin-top: 100px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+.footer-content {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.footer-content p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #f1f8e9;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  padding: 60px 20px;
+  background: #f5f7fa;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.grid-card {
+  background: white;
+  text-decoration: none;
+  color: #333;
+  padding: 30px 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.grid-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  background: #f1f8e9;
+}
+
+.grid-card i {
+  font-size: 36px;
+  color: #2e7d32;
+  margin-bottom: 15px;
+}
+
+.grid-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
 
 
   </style>
 </head>
 <body>
   
-<div class="global-map-bg"></div>
 
-  
       <div id="sidebar" class="sidebar" aria-hidden="true">
       <span class="closebtn" onclick="closeNav()">&times;</span>
       
@@ -373,14 +494,8 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
         <i class="fas fa-ticket-alt"></i> Buy Ticket
       </a>
       
-      <!-- DO NOT REMOVE -->
-      <!-- <a href="redeem_voucher.php">
-        <i class="fas fa-gift"></i> Redeem Voucher
-      </a> -->
-      <!-- DO NOT REMOVE - rico -->
-
       <a href="buyCoin/buy_coins.php">
-        <i class="fas fa-coins"></i> Buy Coins
+        <i class="fas fa-gift"></i> Buy Coins
       </a>
       
       <a href="feedback.php">
@@ -394,7 +509,6 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
       <a href="discountPage/discount_page.php">
         <i class="fas fa-percent"></i> Apply for a Discount
       </a>
-
 
       <div class="sidebar-power">
       <button id="power-toggle">
@@ -411,59 +525,83 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
 
   <header>
      <div class="menu" onclick="openNav()">☰</div>
-        <div class="right-header">
-            <a href="buyCoin/buy_coins.php" class="coin-balance">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#F4C542"/>
-                    <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
-                    <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
-                </svg>
-                <span id="header-balance">₱0</span>
-            </a>
-            <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
-        </div>
+    <div class="right-header">
+        <a href="buyCoin/buy_coins.php" class="coin-balance">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="#F4C542"/>
+                <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
+                <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
+            </svg>
+            <span id="header-balance">₱0</span>
+        </a>
+        <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
+    </div>
   </header>
-  <div class="slideshow-container" id="slideshow-container" style="display: flex;">
-
-  <div class="destination">
-    <div class="destination-flex">
-      <div class="description">
-        <h2>Start your journey with kindness</h2>
-        <p>Offer your seat to the elderly, pregnant women, or persons with disabilities – It’s a sign of respect and kindness.
-        </p>
-      </div>
-      <div class="thumbnails-pattern carousel-thumbnails">
-        <img src="slideshowimg/1.jpg" class="thumb thumb-large" alt="White Beach">
-        <img src="slideshowimg/2.jpg" class="thumb thumb-large" alt="Puka Shell Beach">
-        <img src="slideshowimg/3.jpg" class="thumb thumb-large" alt="Mount Luho Viewpoint">
-        <img src="slideshowimg/4.jpg" class="thumb thumb-large" alt="D'Mall Shopping">
-      </div>
-    </div>
+  <section class="hero-section">
+  <div class="hero-content">
+    <h2>Smart Urban Mobility Starts Here</h2>
+    <p>Track, tap, and travel with ease. Your journey is just one click away.</p>
+    <a href="vehicle.php" class="hero-btn">Book a Ride</a>
   </div>
+  
+</section>
 
-  <div class="destination">
-    <div class="destination-flex">
-      <div class="description">
-        <h2>Keep your things safe</h2>
-        <p>Take care of your belongings at all times. Always watch your bag, wallet, and phone, especially when you are in crowded places. 
-        </p>
-      </div>
-      <div class="thumbnails-pattern carousel-thumbnails">
-        <img src="slideshowimg/5.jpg" class="thumb thumb-large" alt="El Nido">
-        <img src="slideshowimg/6.jpg" class="thumb thumb-large" alt="Coron Island">
-        <img src="slideshowimg/7.jpg" class="thumb thumb-large" alt="Underground River">
-        <img src="slideshowimg/8.jpg" class="thumb thumb-large" alt="Nacpan Beach">
-      </div>
-    </div>
+<section class="features-grid">
+  <div class="feature-card">
+    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="Routes" />
+    <h3>Real-Time Routes</h3>
+    <p>Track buses and E-jeep live with precision.</p>
   </div>
+  <div class="feature-card">
+    <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" alt="Passes" />
+    <h3>Digital Passes</h3>
+    <p>No paper, no hassle.</p>
+  </div>
+  <div class="feature-card">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="24/7" />
+    <h3>24/7 Service</h3>
+    <p>Plan trips anytime, anywhere — day or night.</p>
+  </div>
+</section>
 
-<!-- 🔽 Scroll target placed BELOW buttons -->
+<section class="dashboard-grid">
+  <a href="vehicle.php" class="grid-card">
+    <i class="fas fa-bus"></i>
+    <h3>Vehicles</h3>
+  </a>
+  <a href="ticketing/ticketing.php" class="grid-card">
+    <i class="fas fa-ticket-alt"></i>
+    <h3>Buy Ticket</h3>
+  </a>
+  <a href="buyCoin/buy_coins.php" class="grid-card">
+    <i class="fas fa-coins"></i>
+    <h3>Buy Coins</h3>
+  </a>
+  <a href="redeem_voucher.php" class="grid-card">
+    <i class="fas fa-gift"></i>
+    <h3>Redeem Voucher</h3>
+  </a>
+  <a href="feedback.php" class="grid-card">
+    <i class="fas fa-comment-dots"></i>
+    <h3>Feedback</h3>
+  </a>
+  <a href="discountPage/discount_page.php" class="grid-card">
+    <i class="fas fa-percent"></i>
+    <h3>Apply Discount</h3>
+  </a>
+  <a href="user_prof.php" class="grid-card">
+    <i class="fas fa-user"></i>
+    <h3>Profile</h3>
+  </a>
+</section>
 
-<div class="fixed-booking-container">
-    <button class="btn-book">Book Now!</button>
-</div>
 
-</div> 
+
+<footer class="main-footer">
+  <div class="footer-content">
+    <p>&copy; 2025 Novacore City Transportation. All rights reserved.</p>
+  </div>
+</footer>
 
 <script>
   async function renderUserBalance() {

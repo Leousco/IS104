@@ -149,6 +149,8 @@
     <form action="send_otp.php" method="POST">
       <p class="info-text">Enter your email address and we'll send you a one-time password to reset your account.</p>
 
+      <input type="text" name="fake-email" style="display:none;" autocomplete="off">
+
       <div class="form-group">
         <label for="email">Email Address</label>
         <input 
@@ -156,6 +158,7 @@
           id="email" 
           name="email"
           placeholder="Enter your email"
+          autocomplete="new-email"
           required
         />
       </div>

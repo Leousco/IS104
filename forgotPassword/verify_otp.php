@@ -150,10 +150,10 @@
     </div>
     
     <form action="verify_otp_action.php" method="POST">
-      <p class="info-text">Enter the one-time password that was sent to your email address.</p>
+      <p class="info-text">Enter the one-time PIN that was sent to your email address.</p>
 
       <div class="form-group">
-        <label for="otp">One-Time Pin</label>
+        <label for="otp">One-Time PIN</label>
         <input 
           type="text" 
           id="otp" 
