@@ -1,12 +1,19 @@
 <?php
-session_start();
-include("config.php"); 
+include("config.php");
+include("auth.php");
 
-if (!isset($_SESSION['UserID']) || $_SESSION['Role'] !== "PASSENGER") {
-    // Redirect unauthenticated users
-    header("Location: ../login.php");
+$loginPage = "/SADPROJ/login.php";
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
     exit();
 }
+
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
+
 // Note: We don't fetch data here, as we'll use an AJAX endpoint.
 ?>
 <!doctype html>
@@ -367,8 +374,8 @@ if (!isset($_SESSION['UserID']) || $_SESSION['Role'] !== "PASSENGER") {
         <i class="fas fa-ticket-alt"></i> Buy Ticket
       </a>
       
-      <a href="redeem_voucher.php">
-        <i class="fas fa-gift"></i> Redeem Voucher
+      <a href="buyCoin/buy_coins.php">
+        <i class="fas fa-gift"></i> Buy Coins
       </a>
       
       <a href="feedback.php">
@@ -432,7 +439,7 @@ if (!isset($_SESSION['UserID']) || $_SESSION['Role'] !== "PASSENGER") {
         </form>
     </div>
 
-    <footer>Data is fetched from your MySQL database.</footer>
+    <footer>Redeem your voucher code and get coins.</footer>
 </div>
 
 <script>

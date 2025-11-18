@@ -541,7 +541,7 @@ $balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
   <div class="hero-content">
     <h2>Smart Urban Mobility Starts Here</h2>
     <p>Track, tap, and travel with ease. Your journey is just one click away.</p>
-    <a href="vehicle.php" class="hero-btn">Book a Ride</a>
+    <a href="vehicle.php" class="hero-btn">Plan Your Trip</a>
   </div>
   
 </section>

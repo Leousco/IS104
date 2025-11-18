@@ -255,6 +255,7 @@ if (!$avgRating) $avgRating = 0;
             <a href="vehicle_management.php"><i class="fas fa-car-side"></i> Vehicle Management</a>
             <a href="schedule_management.php"><i class="fas fa-calendar-alt"></i> Schedule Management</a>
             <a href="route_management.php"><i class="fas fa-route"></i> Routes Management</a>
+            <a href="transactions.php"><i class="fas fa-exchange-alt"></i> Transactions </a>
             <a href="discount_applications.php"><i class="fas fa-tags"></i> Discount Applications</a>
         </nav>
     </div>

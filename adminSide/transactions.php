@@ -12,6 +12,12 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
     header("Location: $loginPage?error=unauthorized");
     exit();
 }
+
+// fetch ticket transactions
+$ticketQuery = $conn->query("SELECT * FROM ticket ORDER BY TicketID DESC");
+
+// fetch coin transactions
+$coinQuery = $conn->query("SELECT *FROM coin_transactions ORDER BY TransactionDate DESC")
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -128,6 +134,89 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
             display: block;
             opacity: 1;
         }
+
+
+/* TABLES */
+
+/* Tables styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #d1fae5; /* Tailwind green-100 */
+    z-index: 10;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151; /* gray-700 */
+}
+
+tbody td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #111827; /* text-dark */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9fafb; /* light stripe */
+}
+
+div.overflow-auto {
+    max-height: 500px; /* limit height and enable scrolling */
+    overflow-y: auto;
+    border: 1px solid #e5e7eb; /* subtle border around table container */
+    border-radius: 0.5rem;
+}
+
+/* Add hover effect */
+tbody tr:hover {
+    background-color: #d1fae5; /* subtle hover highlight */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tbody tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background-color: #ffffff;
+    }
+
+    tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        position: relative;
+    }
+
+    tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280; /* gray-500 */
+        flex: 1 1 40%; /* takes 40% of row width */
+    }
+
+    tbody td:last-child {
+        border-bottom: 0;
+    }
+}
+
+
     </style>
 </head>
 
@@ -167,7 +256,81 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
 
 <div class="overlay" id="overlay"></div>
 
+
+
 <!-- MAIN CONTENT -->
+<div class="ml-0 md:ml-0 p-6 max-w-full">
+    <!-- Ticket Transactions Table -->
+    <div class="bg-white shadow rounded-lg p-4 overflow-auto max-h-[14rem] mb-6 w-full">
+        <h2 class="text-lg font-semibold mb-4">Ticket Transactions</h2>
+        <div class ="overflow-auto max-h-96">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-green-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Ticket ID</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Passenger ID</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Schedule ID</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">QR Code</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Fare Amount</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Payment Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <?php while ($ticket = $ticketQuery->fetch_assoc()): ?>
+                    <tr>
+                        <td data-label="Ticket ID" class="px-4 py-2 text-sm"><?= $ticket['TicketID'] ?></td>
+                        <td data-label="Passenger ID" class="px-4 py-2 text-sm"><?= $ticket['PassengerID'] ?></td>
+                        <td data-label="Schedule ID" class="px-4 py-2 text-sm"><?= $ticket['ScheduleID'] ?></td>
+                        <td data-label="QR Code" class="px-4 py-2 text-sm"><?= $ticket['QR_Code'] ?></td>
+                        <td data-label="Fare Amount" class="px-4 py-2 text-sm"><?= $ticket['FareAmount'] ?></td>
+                        <td data-label="Payment Status" class="px-4 py-2 text-sm"><?= $ticket['PaymentStatus'] ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Coin Transactions Table -->
+    <div class="bg-white shadow rounded-lg p-4 overflow-auto max-h-[14rem] mb-6 w-full">
+        <h2 class="text-lg font-semibold mb-4">Coin Transactions</h2>
+        <div class="overflow-auto max-h-96">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-green-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Transaction ID</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">User ID</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Deal ID</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Coin Amount</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount Paid</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Payment Method</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Transaction Date</th>
+                        <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <?php while ($coin = $coinQuery->fetch_assoc()): ?>
+                    <tr>
+                        <td data-label="Transaction ID" class="px-4 py-2 text-sm"><?= $coin['TransactionID'] ?></td>
+                        <td data-label="User ID" class="px-4 py-2 text-sm"><?= $coin['UserID'] ?></td>
+                        <td data-label="Deal ID" class="px-4 py-2 text-sm"><?= $coin['DealID'] ?></td>
+                        <td data-label="Coin Amount" class="px-4 py-2 text-sm"><?= $coin['CoinAmount'] ?></td>
+                        <td data-label="Amount Paid" class="px-4 py-2 text-sm"><?= $coin['AmountPaid'] ?></td>
+                        <td data-label="Payment Method" class="px-4 py-2 text-sm"><?= $coin['PaymentMethod'] ?></td>
+                        <td data-label="Transaction Date" class="px-4 py-2 text-sm"><?= $coin['TransactionDate'] ?></td>
+                        <td data-label="Status" class="px-4 py-2 text-sm"><?= $coin['Status'] ?></td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 
 <script>
 

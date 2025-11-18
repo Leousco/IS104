@@ -345,6 +345,8 @@ while ($r = $routeQuery->fetch_assoc()) {
             border: 1px solid #2e7d32;
             box-shadow: none;
             margin-top: 10px;
+            padding: 5px 10px;
+            flex: 1;
         }
 
         .btn.secondary:hover {
@@ -381,48 +383,40 @@ while ($r = $routeQuery->fetch_assoc()) {
         .ticket-preview-box {
             background: #f0fdf0;
             border: 2px solid #2e7d32;
-            border-radius: 12px;
-            padding: 24px;
-            min-height: 200px;
+            border-radius: 10px;
+            padding: 10px;
             display: flex;
-            align-items: center;
+            flex-direction: column; /* horizontal layout */
             justify-content: center;
+            align-items: center;
+            max-height: 80vh;
+            overflow: hidden;
+            font-size: 0.8rem;
+            gap: 20px; /* space between details and QR */
             text-align: center;
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
         }
-
-        .ticket-preview-box.empty {
-            background: #f9f9f9;
-            border: 2px dashed #ddd;
-            color: #999;
-        }
-
-        .ticket-preview-box .btn.secondary {
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-
-        .ticket-qr {
-            max-width: 150px;
-            height: auto;
-            margin: 10px auto;
-            display: block;
-            border: 2px solid #2e7d32;
-            border-radius: 8px;
-            padding: 6px;
-        }
-
-        .ticket-detail {
+        .ticket-preview-box .ticket-details {
             display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+        .ticket-preview-box .ticket-qr-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .ticket-qr {
+            width: 150px; /* adjust size */
+            height: 150px;
+            border: 2px solid #2e7d32;
+            border-radius: 4px;
+            padding: 2px;
+            align-items: center;
         }
 
-        .ticket-detail:last-child {
-            border-bottom: none;
-        }
+
 
         /* === STATUS MESSAGES === */
         .status-message {
@@ -606,14 +600,14 @@ while ($r = $routeQuery->fetch_assoc()) {
 
         .modal-content {
             background: white;
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 550px;
+            border-radius: 12px;
+            padding: 24px 20px;
+            max-width: 480px;
             width: 90%;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            transform: scale(0.7);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+            transform: scale(0.8);
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
@@ -627,18 +621,18 @@ while ($r = $routeQuery->fetch_assoc()) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #e9e9e9;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9e9e9;
         }
 
         .modal-header h3 {
-            margin: 0;
+            /* margin: 0; */
             color: #2e7d32;
-            font-size: 24px;
+            font-size: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .modal-close {
@@ -664,12 +658,13 @@ while ($r = $routeQuery->fetch_assoc()) {
 
         .modal-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 28px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .modal-actions .btn {
             margin: 0;
+            padding: 10px 14px;
             flex: 1;
         }
 
@@ -724,6 +719,31 @@ while ($r = $routeQuery->fetch_assoc()) {
         .modal-content::-webkit-scrollbar-thumb:hover {
             background: #1b5e20;
         }
+
+        /* ticket card */
+        .ticket-card-qr{
+            display: grid;
+            grid-template-columns: 1.3fr 1fr; /* two equal columns */
+            gap: 16px; /* space between columns */
+            width: 100%;
+            max-width: 500px; /* optional, to prevent it from being too wide */
+            margin: 0 auto;
+        }
+        .ticket-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;               /* spacing between lines */
+            font-size: 15px;
+        }
+
+        .ticket-detail strong {
+            color: #2e7d32;              /* highlight labels */
+        }
+
+        .status-confirmed {
+            color: #2e7d32;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -753,7 +773,7 @@ while ($r = $routeQuery->fetch_assoc()) {
                     <circle cx="12" cy="12" r="8.2" fill="#F9D66B" />
                     <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9" />
                 </svg>
-                <span id="header-balance">₱0</span>
+                <span id="header-balance"> <i class="fas fa-coins"></i>0</span>
             </a>
             <div class="profile" onclick="window.location.href='../user_prof.php'">👤</div>
         </div>
@@ -786,7 +806,7 @@ while ($r = $routeQuery->fetch_assoc()) {
         <div>
             <div class="balance-display">
                 <div class="label">Wallet Balance</div>
-                <div class="amount" id="user-balance">₱0.00</div>
+                <div class="amount" id="user-balance"><i class="fas fa-coins"></i> 0.00</div>
             </div>
 
             <div class="card ticket-card">
@@ -824,7 +844,7 @@ while ($r = $routeQuery->fetch_assoc()) {
 
                     <div class="form-group">
                         <label for="vehicleType">Vehicle Type</label>
-                        <select id="vehicleType" name="vehicleType" required>
+                        <select id="vehicleType" name="vehicleType">
                             <option value="">Select vehicle type</option>
                             <option value="1">Bus</option>
                             <option value="2">E-Jeep</option>
@@ -833,7 +853,7 @@ while ($r = $routeQuery->fetch_assoc()) {
 
                     <div class="form-group">
                         <label for="routeSelect">Route</label>
-                        <select id="routeSelect" name="routeSelect" required>
+                        <select id="routeSelect" name="routeSelect">
                             <option value="">Select Route</option>
                             <?php
                             $routes = $conn->query("SELECT RouteID, StartLocation, EndLocation FROM route");
@@ -877,7 +897,7 @@ while ($r = $routeQuery->fetch_assoc()) {
                                                 <div><strong><?= htmlspecialchars($sch['StartLocation'] . ' → ' . $sch['EndLocation']) ?></strong></div>
                                                 <div><?= $sch['DayOfWeek'] ?></div>
                                                 <div><?= htmlspecialchars($sch['DepartureTime'] . ' → ' . $sch['ArrivalTime']) ?></div>
-                                                <div><?= $sch['TypeID'] == 1 ? 'Bus' : 'E-Jeep' ?> | ₱<?= number_format($sch['Fare'], 2) ?></div>
+                                                <div><?= $sch['TypeID'] == 1 ? 'Bus' : 'E-Jeep' ?> |  <i class="fas fa-coins"></i> <?= number_format($sch['Fare'], 2) ?></div>
                                             </div>
                                         </label>
                                     <?php endwhile; ?>
@@ -890,8 +910,8 @@ while ($r = $routeQuery->fetch_assoc()) {
                     </div>
 
                     <div class="fare-box">
-                        <span>Total Fare:</span>
-                        <span id="fareDisplay">₱0.00</span>
+                        <span>Fare:</span>
+                        <span id="fareDisplay"><i class="fas fa-coins"></i> 0.00</span>
                     </div>
 
                     <button type="submit" class="btn">Book Ticket</button>
@@ -1009,7 +1029,7 @@ while ($r = $routeQuery->fetch_assoc()) {
         function updateFareDisplay() {
             const selected = document.querySelector('input[name="schedule_id"]:checked');
             if (!selected) {
-                fareDisplay.textContent = '₱0.00';
+                fareDisplay.innerHTML = '<i class="fas fa-coins"></i> 0.00';
                 return;
             }
 
@@ -1017,9 +1037,9 @@ while ($r = $routeQuery->fetch_assoc()) {
             const finalFare = isDiscountApproved ? base * 0.8 : base;
 
             if (isDiscountApproved) {
-                fareDisplay.innerHTML = `<span style="text-decoration:line-through;opacity:0.6;">₱${base.toFixed(2)}</span> ₱${finalFare.toFixed(2)}`;
+                fareDisplay.innerHTML = `<span style="text-decoration:line-through;opacity:0.6;"><i class="fas fa-coins"></i> ${base.toFixed(2)}</span> <i class="fas fa-coins"></i> ${finalFare.toFixed(2)}`;
             } else {
-                fareDisplay.textContent = `₱${finalFare.toFixed(2)}`;
+                fareDisplay.innerHTML = `<i class="fas fa-coins"></i> ${finalFare.toFixed(2)}`;
             }
         }
 
@@ -1037,9 +1057,10 @@ while ($r = $routeQuery->fetch_assoc()) {
 
                 if (data.success) {
                     const bal = parseFloat(data.user.balance || 0).toFixed(2);
-                    ub.textContent = '₱' + bal;
-                    if (hb) hb.textContent = '₱' + bal;
-                } else {
+                    ub.innerHTML = `<i class="fas fa-coins"></i> ${bal}`;
+                    if (hb) hb.innerHTML = ` ${bal}`;
+                }
+                else {
                     ub.textContent = 'Error';
                     if (hb) hb.textContent = 'Error';
                     console.error(data.error);
@@ -1088,8 +1109,9 @@ while ($r = $routeQuery->fetch_assoc()) {
                 </div>
                 <div class="ticket-detail">
                     <strong>Fare:</strong>
-                    <span>₱${parseFloat(pendingBookingData.fare).toFixed(2)}</span>
+                    <span> <i class="fas fa-coins"></i> ${parseFloat(pendingBookingData.fare).toFixed(2)}</span>
                 </div>
+                <div class="ticket-detail"><strong>Quantity:</strong> <span></span> (Feature TBI) </div>
                 <div class="ticket-detail">
                     <strong>Status:</strong>
                     <span><span class="status-badge status-active">Active</span></span>
@@ -1165,16 +1187,17 @@ async function generateTicket() {
         // Update balance
         if (data.balance !== undefined) {
             const newBal = parseFloat(data.balance).toFixed(2);
-            document.getElementById('user-balance').textContent = '₱' + newBal;
-            document.getElementById('header-balance').textContent = '₱' + newBal;
+            document.getElementById('user-balance').innerHTML = `<i class="fa-solid fa-coins"></i> ${newBal}`;
+            document.getElementById('header-balance').innerHTML = ` ${newBal}`;
         }
+
 
         // Show email status message
         let emailStatusMsg = '';
         if (data.email_sent) {
             emailStatusMsg = `
                 <div style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
-                    <i class="fas fa-check-circle"></i> <strong>Email sent!</strong> Check your inbox at <strong>${pendingBookingData.email}</strong>
+                    <i class="fas fa-check-circle"></i> Check your inbox at <strong>${pendingBookingData.email}</strong>
                 </div>
             `;
         } else if (data.email_error) {
@@ -1189,20 +1212,39 @@ async function generateTicket() {
         const ticketPreview = document.getElementById('ticket-preview');
         ticketPreview.className = 'ticket-preview-box';
         ticketPreview.innerHTML = `
-            <div style="width:100%; text-align:left;">
-                ${emailStatusMsg}
-                <div class="ticket-detail"><strong>Ticket ID:</strong> #${data.ticket_id}</div>
-                <div class="ticket-detail"><strong>Passenger:</strong> ${data.name}</div>
-                <div class="ticket-detail"><strong>Email:</strong> ${pendingBookingData.email}</div>
-                <div class="ticket-detail"><strong>Destination:</strong> ${data.destination}</div>
-                <div class="ticket-detail"><strong>Date:</strong> ${data.date}</div>
-                <div class="ticket-detail"><strong>Time:</strong> ${data.departure_time} → ${data.arrival_time}</div>
-                <div class="ticket-detail"><strong>Vehicle:</strong> ${data.vehicle_type}</div>
-                <div class="ticket-detail"><strong>Fare:</strong> ₱${parseFloat(data.fare).toFixed(2)}</div>
-                <div class="ticket-detail"><strong>Status:</strong> <span style="color:#2e7d32;">✓ Confirmed</span></div>
+            <div style="width:100%; text-align:center;">
+
+                    ${emailStatusMsg}
+
+                <div class="ticket-card-qr">
+                    
+                    <!-- Left column -->
+                    <div>
+                        <div class="ticket-detail"><strong>Ticket ID:</strong> <span>#${data.ticket_id}</span></div>
+                        <div class="ticket-detail"><strong>Passenger:</strong> <span>${data.name}</span></div>
+                        <div class="ticket-detail"><strong>Email:</strong> <span>${pendingBookingData.email}</span></div>
+                        <div class="ticket-detail"><strong>Destination:</strong> <span>${data.destination}</span></div>
+                        <div class="ticket-detail"><strong>Vehicle:</strong> <span>${data.vehicle_type}</span></div>
+                    </div>
+
+                    <!-- Right column -->
+                    <div>
+                        <div class="ticket-detail"><strong>Date:</strong> <span>${data.date}</span></div>
+                        <div class="ticket-detail"><strong>Time:</strong> <span>${data.departure_time} → ${data.arrival_time}</span></div>
+                        <div class="ticket-detail"><strong>Fare:</strong> <span> <i class="fas fa-coins"></i> ${parseFloat(data.fare).toFixed(2)}</span></div>
+                        <div class="ticket-detail"><strong>Quantity:</strong> <span></span> (Feature TBI) </div>
+                        <div class="ticket-detail"><strong>Status:</strong> <span class="status-confirmed">✓ Confirmed</span></div>
+                    </div>
+                </div>
+
+                
                 ${data.qr ? `<div style="text-align:center; margin-top:20px;">
                     <p style="margin-bottom:10px;font-weight:600;color:#2e7d32;">Scan this QR Code:</p>
-                    <img src="${data.qr}" alt="Ticket QR Code" class="ticket-qr">
+
+                    <div class="ticket-qr-container">
+                        <img src="${data.qr}" alt="Ticket QR Code" class="ticket-qr">
+                    </div>
+
                     <button class="btn secondary" onclick="downloadTicket('${data.qr}','${data.name}','${data.destination}')">
                         <i class="fas fa-download"></i> Download Ticket
                     </button>
@@ -1218,7 +1260,7 @@ async function generateTicket() {
         routeSelect.value = '';
         daySelect.value = '';
         filterSchedules();
-        fareDisplay.textContent = '₱0.00';
+        fareDisplay.innerHTML = '<i class="fas fa-coins"></i> 0.00';
 
         // Close modal
         closeConfirmationModal();
