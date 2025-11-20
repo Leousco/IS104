@@ -324,8 +324,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     input, textarea, select {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      resize: none;
+    }
 
     .sidebar-power {
     position: absolute;

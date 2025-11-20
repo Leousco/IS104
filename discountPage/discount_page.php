@@ -276,7 +276,7 @@ function isDisabled($category) {
           <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z"
             fill="#D39C12" opacity="0.9" />
         </svg>
-        <span id="header-balance">₱0</span>
+        <span id="header-balance">0</span>
       </a>
       <div class="profile" onclick="location.href='../user_prof.php'">👤</div>
     </div>
@@ -411,10 +411,10 @@ function isDisabled($category) {
         const data = await res.json();
         if (data.success) {
           const balance = parseFloat(data.user.balance || 0).toFixed(2);
-          hb.textContent = '₱' + balance;
-        } else hb.textContent = 'Err';
+          hb.textContent = '' + balance;
+        } else hb.textContent = '0.00';
       } catch {
-        hb.textContent = 'Err';
+        hb.textContent = '0.00';
       }
     }
     renderUserBalance();

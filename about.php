@@ -375,7 +375,7 @@
           <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
           <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
         </svg>
-        <span id="header-balance">₱0.00</span>
+        <span id="header-balance">0.00</span>
       </a>
       <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
     </div>
@@ -467,10 +467,10 @@
         const data = await res.json();
         if (data.success) {
           const balance = parseFloat(data.user.balance || 0).toFixed(2);
-          hb.textContent = '₱' + balance;
-        } else hb.textContent = '₱0.00';
+          hb.textContent = '' + balance;
+        } else hb.textContent = '0.00';
       } catch {
-        hb.textContent = '₱0.00';
+        hb.textContent = '0.00';
       }
     }
     renderUserBalance();

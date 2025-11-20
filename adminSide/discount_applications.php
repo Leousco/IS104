@@ -223,7 +223,7 @@ main {
 <!-- HEADER -->
 <header class="bg-green-200 text-green-900 p-4 shadow-md flex items-center">
     <div class="menu-icon" id="menuBtn"><i class="fas fa-bars"></i></div>
-    <h1><i class="fas fa-ticket-alt text-green-700"></i> Voucher Management</h1>
+    <h1><i class="fas fas fa-tags text-green-700"></i> Discount Applications</h1>
 </header>
 
 <div class="sidebar" id="sidebar">
@@ -361,11 +361,12 @@ document.querySelectorAll('.actionBtn').forEach(btn => {
     const act = btn.dataset.act;
     if (!confirm(`Are you sure you want to ${act} this application?`)) return;
 
-    fetch('discount_applications.php', {
+    fetch('update_status.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: new URLSearchParams({action: act, id: id})
+      body: new URLSearchParams({application_id: id, status: act === 'approve' ? 'Approved' : 'Rejected'})
     })
+
     .then(r => r.json())
     .then(res => {
       if (res.success) location.reload();

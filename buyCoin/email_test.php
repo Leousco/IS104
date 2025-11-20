@@ -16,7 +16,7 @@ try {
     $mail->Port = 587;
 
     $mail->setFrom('novacore.mailer@gmail.com', 'NovaCore Team');
-    $mail->addAddress('lvillete778@gmail.com');
+    $mail->addAddress('your email here'); // <-- change this to your email
 
     $mail->isHTML(true);
     $mail->Subject = 'Test Email';

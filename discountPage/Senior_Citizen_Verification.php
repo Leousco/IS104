@@ -365,7 +365,7 @@ $conn->close();
             <input type="text" name="fullName" placeholder="Full Name" class="border rounded w-full p-2" id="fullName" required>
             <input type="email" name="email" placeholder="Email" class="border rounded w-full p-2" id="email" required>
             <input type="number" name="age" placeholder="Age" class="border rounded w-full p-2" id="age" required>
-            <input type="text" name="address" placeholder="Address" class="border rounded w-full p-2" id="address" required>
+            <!-- <input type="text" name="address" placeholder="Address" class="border rounded w-full p-2" id="address" required> -->
             <textarea name="notes" placeholder="Add Notes (Optional)" class="border rounded w-full p-2 resize-none"></textarea>
           </div>
 

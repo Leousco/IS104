@@ -83,7 +83,7 @@ try {
 
     // CHANGE THESE ↓↓↓
     $mail->Username = 'novacore.mailer@gmail.com';
-    $mail->Password = 'yjwc zsaa jltv vekq';  // Gmail App Password
+    $mail->Password = 'yjwc zsaa jltv vekq';  
     // CHANGE THESE ↑↑↑
 
     $mail->SMTPSecure = 'tls';
