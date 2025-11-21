@@ -129,14 +129,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
      /* SIDEBAR */
     .sidebar {
-        height: 100%;
-        width: 0;
+      height: 100%;
+        width: 0px;
         position: fixed;
         top: 0;
         left: 0;
         background-color: #1b1b1b;
         overflow: hidden;
-        transition: 0.4s;
         padding-top: 60px;
         z-index: 1000;
         transition: width 0.3s ease, background 0.3s ease;
@@ -149,17 +148,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         color: #ddd;
         display: block;
         transition: 0.3s;
+        white-space: nowrap; 
+        overflow: hidden;
     }
 
     /* 2. Style the Icon element */
-    .sidebar a i {
-        /* Set a fixed width to keep the text aligned, even if icons are different sizes */
+    /* .sidebar a i {
         width: 25px; 
-        /* Add some space between the icon and the link text */
         margin-right: 10px; 
-        /* Vertically align the icon with the text */
         text-align: center; 
-    }
+    } */
 
     .sidebar a:hover {
         background: #2e7d32;
@@ -214,6 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       padding: 20px;
       max-width: 800px;
       margin: auto;
+      position: fixed;
     }
 
    
@@ -333,7 +332,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     bottom: 20px;
     left: 0;
     width: 100%;
-    padding: 0 20px;
   }
 
   #power-toggle {
@@ -383,15 +381,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     display: none;
   }
 
-
+  #hover-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;     /* hover are width */
+    height: 100vh;
+    z-index: 999;    
+}
 
   </style>
 
   
 </head>
 <body>
+
+<div id="hover-zone"></div>
+
         <header>
-    <div class="menu" onclick="openNav()">☰</div>
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-lines-vertical"></i></div>
     <div class="right-header">
       <a href="redeem_voucher.php" class="coin-balance">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -433,7 +441,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="global-map-bg"></div>
 
       <div id="sidebar" class="sidebar" aria-hidden="true">
-      <span class="closebtn" onclick="closeNav()">&times;</span>
+      <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
       
       <a href="passenger_dashboard.php">
         <i class="fas fa-home"></i> Homepage
@@ -463,16 +471,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <i class="fas fa-percent"></i> Apply for a Discount
       </a>
 
-          <div class="sidebar-power">
-      <button id="power-toggle">
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
-      <div id="power-menu" class="power-menu hidden">
-        <a href="login.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        <a href="report_bug.php"><i class="fas fa-arrow-left"></i> Back</a>
+      <div class="sidebar-power">
+          <a href="passenger_dashboard.php">
+            <i class="fas fa-angle-left"></i> Back
+          </a>
       </div>
-    </div>
-    </div>
+</div>
 
  
   <main>
@@ -492,9 +496,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           value="<?= htmlspecialchars($userFullName) ?>">
 
         </label>
-
-
-
+        
         <!-- ✅ Date + Time input -->
         <label>
           Date & Time Occurred:
@@ -513,6 +515,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </main>
 
  <script>
+
+// hover sidebar
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
+
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
+
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
 
   document.getElementById('power-toggle').addEventListener('click', function () {
     const menu = document.getElementById('power-menu');
@@ -537,7 +552,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     function openNav(){
       const sb = document.getElementById('sidebar');
-      sb.style.width = '250px';
+      sb.style.width = '280px';
       sb.setAttribute('aria-hidden','false');
     }
     function closeNav(){

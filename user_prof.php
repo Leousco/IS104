@@ -52,23 +52,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // --- HANDLE PROFILE PICTURE UPDATE (via AJAX/Fetch) ---
+    // --- HANDLE PROFILE PICTURE UPDATE (via AJAX/Fetch) ---
     if (isset($_POST['action']) && $_POST['action'] === 'update_profile_picture') {
-        // This is an AJAX request, so we only output the success/error message
-        header('Content-Type: application/json');
-        
-        $new_url = $_POST['url'] ?? '';
-        
-        // IMPORTANT: The 'ProfilePictureURL' column MUST exist in your 'users' table.
-        $stmt = $conn->prepare("UPDATE users SET ProfilePictureURL = ? WHERE UserID = ?");
-        $stmt->bind_param("si", $new_url, $user_id);
-        
-        if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Profile picture updated.']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
-        }
-        $stmt->close();
-        exit; // Exit after handling AJAX
+      header('Content-Type: application/json');
+      
+      $new_url = $_POST['url'] ?? '';
+      
+      // Validate that URL is not empty
+      if (empty($new_url)) {
+          echo json_encode(['success' => false, 'message' => 'No image data provided.']);
+          exit;
+      }
+      
+      // Validate Base64 format or URL
+      $isValidBase64 = (strpos($new_url, 'data:image') === 0);
+      $isValidURL = filter_var($new_url, FILTER_VALIDATE_URL);
+      
+      if (!$isValidBase64 && !$isValidURL) {
+          echo json_encode(['success' => false, 'message' => 'Invalid image format.']);
+          exit;
+      }
+      
+      try {
+          // Check if column exists, if not create it
+          $check_column = $conn->query("SHOW COLUMNS FROM users LIKE 'ProfilePictureURL'");
+          
+          if ($check_column->num_rows == 0) {
+              // Column doesn't exist, create it
+              $conn->query("ALTER TABLE users ADD COLUMN ProfilePictureURL TEXT NULL");
+          }
+          
+          // Update the profile picture URL
+          $stmt = $conn->prepare("UPDATE users SET ProfilePictureURL = ? WHERE UserID = ?");
+          $stmt->bind_param("si", $new_url, $user_id);
+          
+          if ($stmt->execute()) {
+              // Update session variable for immediate reflection on other pages
+              $_SESSION['ProfilePictureURL'] = $new_url;
+              
+              echo json_encode([
+                  'success' => true, 
+                  'message' => 'Profile picture updated successfully!'
+              ]);
+          } else {
+              echo json_encode([
+                  'success' => false, 
+                  'message' => 'Database error: ' . $conn->error
+              ]);
+          }
+          $stmt->close();
+          
+      } catch (Exception $e) {
+          echo json_encode([
+              'success' => false, 
+              'message' => 'Error: ' . $e->getMessage()
+          ]);
+      }
+      
+      exit; // Exit after handling AJAX
     }
 
     // --- HANDLE PASSWORD CHANGE (via AJAX/Fetch) ---
@@ -219,17 +260,22 @@ $conn->close();
       background:#d9eab1; /* Light Tan/Green Background */
       padding:20px;
     }
+
+            body::-webkit-scrollbar {
+          display: none; /* Hides the scrollbar */
+          width: 0; /* Ensures no width space is reserved for the scrollbar */
+        }
     /* HEADER */
     header{
       position:fixed;
       top:0; left:0;
       width:100%; height:60px;
-      background:#4b9a39; /* Deep Green Header */
+      background:linear-gradient(90deg, #2e7d32, #66bb6a);
       color:white;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:0 20px;
+      padding:15px 20px;;
       z-index:100;
       box-shadow:0 2px 8px rgba(0,0,0,.15);
     }
@@ -406,7 +452,7 @@ $conn->close();
       .container{margin-left:0;flex-direction:column;}
     }
 
-    .logout a {
+.logout a {
     padding: 6px 8px;
     border-radius: 6px;
     transition: background-color 0.2s ease, transform 0.15s ease;
@@ -440,21 +486,17 @@ $conn->close();
           <p style="font-size:13px;color:#666;"><?php echo htmlspecialchars($email); ?></p>
         </div>
         <div class="menu">
+          <a href="#" class="active"><i class="fa fa-user"></i> My Profile</a>
           <a href="passenger_dashboard.php"><i class="fa fa-home"></i> Homepage</a>
           <a href="vehicle.php"><i class="fa fa-bus"></i> Vehicles</a>
           <a href="ticketing/ticketing.php"><i class="fa fa-ticket"></i> Buy Ticket</a>
           <a href="buyCoin/buy_coins.php"><i class="fa fa-coins"></i> Buy Coins</a>
-          <a href="redeem_voucher.php"><i class="fa fa-gift"></i> Redeem Voucher</a>
           <a href="Feedback.php"><i class="fa fa-comment"></i> Feedback</a>
           <a href="about.php"><i class="fa fa-info-circle"></i> About Us</a>
-          <a href="#" class="active"><i class="fa fa-user"></i> My Profile</a>
         </div>
       </div>
 
-      <div class="logout" style="display: flex; flex-direction: column; gap: 10px; padding: 10px 20px;">
-        <a href="passenger_dashboard.php" style="text-decoration:none;color:#333;display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <i class="fa fa-home"></i> Dashboard
-        </a>
+    <div class="logout" style="display: flex; flex-direction: column; gap: 10px; padding: 10px 20px;">
 
         <a id="logoutBtn" style="text-decoration:none;color:#333;display:flex;align-items:center;gap:8px;cursor:pointer;">
             <i class="fa fa-sign-out-alt"></i> Log Out
@@ -650,60 +692,207 @@ $conn->close();
     logoutBtn.onclick=()=>{openModal("logoutModal");}
     hamburgerBtn.onclick = ()=>{sidebar.classList.toggle("hidden");}
     
-    // --- Profile Picture Functions (Server communication added) ---
-    async function updateProfilePicture(url) {
-        showLoader('photoModal', true);
-        try {
-            const formData = new FormData();
-            formData.append('action', 'update_profile_picture');
-            formData.append('url', url);
 
-            const response = await fetch('user_prof.php', {
-                method: 'POST',
-                body: formData,
-            });
 
-            const result = await response.json();
-            
-            if (result.success) {
-                // Update images on success
-                profileImg.src = url;
-                headerUserImg.src = url;
-                showAlert(result.message);
-            } else {
-                showAlert(result.message, true);
-            }
-        } catch (e) {
-            showAlert("Failed to connect to the server.", true);
-        } finally {
-            showLoader('photoModal', false);
-            closeModal("photoModal");
-        }
-    }
-
-    function choosePhoto(){fileInput.click();}
+// --- Profile Picture Functions (Improved Version) ---
+async function updateProfilePicture(url) {
+    console.log('Updating profile picture...');
+    showLoader('photoModal', true);
     
-    fileInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        // Convert image to Base64 URL (for saving in the database column)
-        reader.onload = function(evt) {
-            updateProfilePicture(evt.target.result);
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    try {
+        const formData = new FormData();
+        formData.append('action', 'update_profile_picture');
+        formData.append('url', url);
 
-    function takePhoto(){
-      // Mock camera capture - typically this would involve getUserMedia
-      showAlert("Camera access granted (mock capture). Using default image.");
-      // You would normally capture and convert the image here, then call updateProfilePicture(base64Image)
+        const response = await fetch('user_prof.php', {
+            method: 'POST',
+            body: formData,
+        });
+
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Server response:', result);
+        
+        if (result.success) {
+            // Update images on success
+            profileImg.src = url;
+            headerUserImg.src = url;
+            showAlert(result.message);
+        } else {
+            showAlert(result.message || 'Failed to update profile picture.', true);
+        }
+    } catch (e) {
+        console.error('Profile picture update error:', e);
+        showAlert("Failed to connect to the server: " + e.message, true);
+    } finally {
+        showLoader('photoModal', false);
+        closeModal("photoModal");
     }
+}
 
-    function removePhoto(){
+function choosePhoto() {
+    fileInput.click();
+}
+
+fileInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showAlert('Please select a valid image file.', true);
+        return;
+    }
+    
+    // Validate file size (max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+        showAlert('Image size must be less than 2MB.', true);
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(evt) {
+        // Compress and resize the image before saving
+        compressImage(evt.target.result, (compressedBase64) => {
+            updateProfilePicture(compressedBase64);
+        });
+    };
+    
+    reader.onerror = function() {
+        showAlert('Failed to read the image file.', true);
+    };
+    
+    reader.readAsDataURL(file);
+});
+
+// Image compression function to reduce database size
+function compressImage(base64, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set maximum dimensions
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
+        
+        let width = img.width;
+        let height = img.height;
+        
+        // Calculate new dimensions while maintaining aspect ratio
+        if (width > height) {
+            if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+            }
+        } else {
+            if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+            }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression (0.7 quality = 70%)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        
+        callback(compressedBase64);
+    };
+    
+    img.onerror = function() {
+        showAlert('Failed to process the image.', true);
+    };
+    
+    img.src = base64;
+}
+
+// Actual camera capture function
+function takePhoto() {
+    // Check if browser supports camera
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showAlert('Camera access is not supported in this browser.', true);
+        return;
+    }
+    
+    // Create a video element for camera preview
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.style.maxWidth = '100%';
+    video.style.marginBottom = '10px';
+    
+    const captureBtn = document.createElement('button');
+    captureBtn.textContent = 'Capture Photo';
+    captureBtn.className = 'btn-primary';
+    captureBtn.style.marginBottom = '10px';
+    
+    const modalContent = photoModal.querySelector('.modal-content');
+    
+    // Clear modal and add camera view
+    const originalContent = modalContent.innerHTML;
+    modalContent.innerHTML = '';
+    modalContent.appendChild(video);
+    modalContent.appendChild(captureBtn);
+    
+    const backBtn = document.createElement('button');
+    backBtn.textContent = 'Cancel';
+    backBtn.className = 'btn-danger';
+    modalContent.appendChild(backBtn);
+    
+    // Request camera access
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            
+            captureBtn.onclick = () => {
+                // Create canvas and capture frame
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                // Stop camera
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Compress and save
+                compressImage(canvas.toDataURL('image/jpeg'), (compressed) => {
+                    modalContent.innerHTML = originalContent;
+                    updateProfilePicture(compressed);
+                });
+            };
+            
+            backBtn.onclick = () => {
+                stream.getTracks().forEach(track => track.stop());
+                modalContent.innerHTML = originalContent;
+            };
+        })
+        .catch(err => {
+            console.error('Camera error:', err);
+            showAlert('Failed to access camera: ' + err.message, true);
+            modalContent.innerHTML = originalContent;
+        });
+}
+
+function removePhoto() {
+    if (confirm('Are you sure you want to remove your profile picture?')) {
         updateProfilePicture(DEFAULT_AVATAR);
     }
+}
+
+
 
     // --- Password Functions (Server communication added) ---
     function checkStrength(){

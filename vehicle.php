@@ -1,3 +1,22 @@
+<?php
+include("config.php");
+include("auth.php");
+
+$loginPage = "/SADPROJ/login.php";
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: $loginPage");
+    exit();
+}
+
+if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
+    header("Location: $loginPage?error=unauthorized");
+    exit();
+}
+
+$balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,12 +74,14 @@
 
     .sidebar {
       height: 100%; width: 0; position: fixed; top: 0; left: 0;
-      background-color: #1b1b1b; overflow-x: hidden; transition: 0.4s;
+      background-color: #1b1b1b; overflow-x: hidden; transition: 0.3s;
       padding-top: 60px; z-index: 1000;
     }
     .sidebar a {
       padding: 14px 28px; text-decoration: none; font-size: 18px; color: #ddd;
       display: block; transition: 0.3s;
+      white-space: nowrap;
+      overflow: hidden;
     }
     .sidebar a:hover { background: #2e7d32; color: #fff; padding-left: 35px; }
     .sidebar .closebtn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: white; }
@@ -154,12 +175,11 @@
       background-size: cover; opacity: 0.1; z-index: -1;
     }
 
-        .sidebar-power {
+  .sidebar-power {
     position: absolute;
     bottom: 20px;
     left: 0;
     width: 100%;
-    padding: 0 20px;
   }
 
   #power-toggle {
@@ -344,18 +364,139 @@
   transform: scaleX(1);
 }
 
+#hover-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;     /* hover are width */
+    height: 100vh;
+    z-index: 999;    
+}
 
 
+/* LOGOUT CSS */
+/* Logout Popup Styles */
+.logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.logout-modal {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.logout-icon i {
+  font-size: 32px;
+  color: white;
+}
+
+.logout-modal h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.logout-modal p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.logout-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Buttons */
+.btn-cancel, .btn-confirm {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* CANCEL BUTTON - RED */
+.btn-cancel {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-cancel:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+/* CONFIRM BUTTON - GREEN */
+.btn-confirm {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirm:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
 
   </style>
 </head>
 <body>
 
+<!-- CONFIRMATION POPUP -->
+<div id="logout-popup" class="logout-overlay" style="display: none;">
+  <div class="logout-modal">
+    <div class="logout-icon"> 
+    </div>
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to logout?</p>
+    <div class="logout-buttons">
+      <button class="btn-cancel" onclick="closeLogoutPopup()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmLogout()">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
+<div id="hover-zone"></div>
+
 <div class="global-map-bg"></div>
 
 <!-- SIDEBAR -->
  <div id="sidebar" class="sidebar" aria-hidden="true">
-      <span class="closebtn" onclick="closeNav()">&times;</span>
+      <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
       
       <a href="passenger_dashboard.php">
         <i class="fas fa-home"></i> Homepage
@@ -386,27 +527,23 @@
       </a>
 
       <div class="sidebar-power">
-      <button id="power-toggle">
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
-      <div id="power-menu" class="power-menu hidden">
-        <a href="login.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        <a href="vehicle.php"><i class="fas fa-arrow-left"></i> Back</a>
+          <a href="javascript:void(0);" onclick="showLogoutPopup()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
       </div>
-    </div>
 
-    </div>
+</div>
 
 
 
 <!-- HEADER -->
 <header>
    <div class="header-left">
-    <div class="menu" onclick="openNav()">☰</div>
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-lines-vertical"></i></div>
     <span class="page-title">Vehicle Selection</span> <!-- or App Name -->
   </div>
     <div class="right-header">
-        <a href="redeem_voucher.php" class="coin-balance">
+        <a href="buyCoin/buy_coins.php" class="coin-balance">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" fill="#F4C542"/>
                 <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
@@ -442,111 +579,102 @@
   </a>
 </section>
 
+
+
 <script>
+// Hover sidebar functionality
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
 
-   document.getElementById('power-toggle').addEventListener('click', function () {
-    const menu = document.getElementById('power-menu');
-    menu.classList.toggle('hidden');
-  });
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
 
-  async function renderUserBalance() {
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
+// Sidebar navigation functions
+function openNav() { 
+    document.getElementById("sidebar").style.width = "280px"; 
+    document.getElementById("sidebar").setAttribute("aria-hidden", "false"); 
+}
+
+function closeNav() { 
+    document.getElementById("sidebar").style.width = "0"; 
+    document.getElementById("sidebar").setAttribute("aria-hidden", "true"); 
+}
+
+// Fetch and display user balance
+async function renderUserBalance() {
+    console.log('Starting renderUserBalance()');
+    
     const hb = document.getElementById('header-balance');
+    
+    if (!hb) {
+        console.error('ERROR: header-balance element not found!');
+        return;
+    }
+    
     hb.textContent = '...';
+    
     try {
+        console.log('Fetching balance...');
         const res = await fetch('get_passenger_data.php');
+        
+        console.log('Response status:', res.status);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
+        
         const data = await res.json();
+        console.log('Received data:', data);
+        
         if (data.success) {
             const balance = parseFloat(data.user.balance || 0).toFixed(2);
-            hb.textContent = '' + balance;
-        } else hb.textContent = 'Err';
-    } catch {
+            hb.textContent = balance;
+            console.log('Balance updated:', balance);
+        } else {
+            console.error('API error:', data.error);
+            hb.textContent = 'Err';
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
         hb.textContent = 'Err';
     }
 }
+
+// Load balance when page loads
 renderUserBalance();
-  function openNav() { document.getElementById("sidebar").style.width = "280px"; document.getElementById("sidebar").setAttribute("aria-hidden", "false"); }
-  function closeNav() { document.getElementById("sidebar").style.width = "0"; document.getElementById("sidebar").setAttribute("aria-hidden", "true"); }
-
- 
-  const exploreBtn = document.getElementById('explore-btn');
-  const homepageContent = document.getElementById('homepage-content');
-  const slideshowContainer = document.getElementById('slideshow-container');
-  const destinations = document.querySelectorAll('.destination');
-  let currentIndex = 0;
-  let interval;
 
 
-let imageIntervals = [];
-const DEST_IMAGE_VISIBLE = 1; 
-
-function startImageCarousel(dest) {
-  const thumbnails = dest.querySelectorAll('.thumb');
-  let imgIndex = 0;
-
- 
-  thumbnails.forEach(t => t.style.display = 'none');
-
-
-  function showImages() {
-  thumbnails.forEach((t, i) => {
-    t.classList.remove('show');
-    t.style.display = 'none';
-  });
-  const showIdx = imgIndex % thumbnails.length;
-  thumbnails[showIdx].style.display = 'block';
-  setTimeout(() => thumbnails[showIdx].classList.add('show'), 10); 
-  imgIndex = (imgIndex + 1) % thumbnails.length;
-}
-  showImages();
- 
-  const intv = setInterval(showImages, 2000); 
-  imageIntervals.push(intv);
+// CONFIRMATION POPUP FUNCTION
+// Logout popup functions
+function showLogoutPopup() {
+  document.getElementById('logout-popup').style.display = 'flex';
+  // Close sidebar when showing popup
+  closeNav();
 }
 
-function stopAllImageCarousels() {
-  imageIntervals.forEach(clearInterval);
-  imageIntervals = [];
+function closeLogoutPopup() {
+  document.getElementById('logout-popup').style.display = 'none';
 }
 
-function showDestination(index) {
-  destinations.forEach((dest, i) => {
-    dest.style.display = i === index ? 'flex' : 'none';
-    const desc = dest.querySelector('.description');
-    const thumbs = dest.querySelectorAll('.thumb');
-    if(i === index){
-      desc.style.opacity = 0;
-      thumbs.forEach(t => t.style.opacity = 0);
-      setTimeout(() => {
-        desc.style.opacity = 1;
-        thumbs.forEach(t => t.style.opacity = 1);
-      }, 500);
-
-      
-      startImageCarousel(dest);
-    }
-  });
+function confirmLogout() {
+  // Redirect to logout/login page
+  window.location.href = 'login.php';
 }
 
-  function startSlideshow() {
-  homepageContent.style.display = 'none';
-  slideshowContainer.style.display = 'flex';
-  showDestination(currentIndex);
-  interval = setInterval(() => {
-    stopAllImageCarousels();
-    currentIndex = (currentIndex + 1) % destinations.length;
-    showDestination(currentIndex);
-  }, 10000); 
-}
-
-function backToHomepage() {
-  clearInterval(interval);
-  stopAllImageCarousels();
-  slideshowContainer.style.display = 'none';
-  homepageContent.style.display = 'flex';
-  currentIndex = 0;
-}
-
-  exploreBtn.addEventListener('click', startSlideshow);
+// Close popup when clicking outside the modal
+document.addEventListener('click', function(event) {
+  const popup = document.getElementById('logout-popup');
+  const modal = document.querySelector('.logout-modal');
+  
+  if (event.target === popup) {
+    closeLogoutPopup();
+  }
+});
 </script>
 
 </body>

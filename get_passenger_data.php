@@ -1,7 +1,8 @@
 <?php
-session_start();
+
 // Use the relative path your file is already using:
-include("config.php"); 
+include("config.php");
+include("auth.php");
 
 header('Content-Type: application/json');
 

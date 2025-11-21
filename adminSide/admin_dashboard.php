@@ -200,6 +200,13 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
             display: block; 
             opacity: 1;
         }
+
+        #logoutBtn:hover {
+        background: #2e7d32;
+        color: #fff;
+        padding-left: 35px;
+        }
+
         
     </style>
 </head>
@@ -231,9 +238,10 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "ADMIN") {
         <a href="route_management.php"><i class="fas fa-route"></i> Routes Management</a>
         <a href="transactions.php"><i class="fas fa-exchange-alt"></i> Transactions </a>
         <a href="discount_applications.php"><i class="fas fa-tags"></i> Discount Applications</a>
+        <a id="logoutBtn" style="color:#ddd; padding:14px 28px; display:block; cursor:pointer;">
+        <i class="fas fa-sign-out-alt"></i> Log Out</a>
+
     </div>
-
-
     <div class="overlay" id="overlay"></div>
 
     <main>

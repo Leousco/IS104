@@ -15,6 +15,7 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
 }
 
 // Note: We don't fetch data here, as we'll use an AJAX endpoint.
+$balance = isset($_SESSION['balance']) ? $_SESSION['balance'] : 0;
 ?>
 <!doctype html>
 <html lang="en">
@@ -108,7 +109,7 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
         left: 0;
         background-color: #1b1b1b;
         overflow: hidden;
-        transition: 0.4s;
+        transition: 0.3s;
         padding-top: 60px;
         z-index: 1000;
         transition: width 0.3s ease, background 0.3s ease;
@@ -121,6 +122,8 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
         color: #ddd;
         display: block;
         transition: 0.3s;
+        white-space: nowrap;
+        overflow: hidden;
     }
 
     /* 2. Style the Icon element */
@@ -285,7 +288,6 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
     bottom: 20px;
     left: 0;
     width: 100%;
-    padding: 0 20px;
   }
 
   #power-toggle {
@@ -354,13 +356,26 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
             font-size: 14px;
             opacity: 0.9;
         }
+
+        #hover-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 10px;     /* hover are width */
+            height: 100vh;
+            z-index: 999;    
+        }
         
     </style>
 </head>
 <body>
+
+<div id="hover-zone"></div>
+
 <div class="global-map-bg"></div>
-  <div id="sidebar" class="sidebar" aria-hidden="true">
-      <span class="closebtn" onclick="closeNav()">&times;</span>
+  
+<div id="sidebar" class="sidebar" aria-hidden="true">
+      <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
       
       <a href="passenger_dashboard.php">
         <i class="fas fa-home"></i> Homepage
@@ -391,20 +406,16 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
       </a>
 
       <div class="sidebar-power">
-  <button id="power-toggle">
-    <i class="fas fa-sign-out-alt"></i>
-  </button>
-  <div id="power-menu" class="power-menu hidden">
-    <a href="login.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    <a href="redeem_voucher.php"><i class="fas fa-arrow-left"></i> Back</a>
-  </div>
-</div>
+          <a href="passenger_dashboard.php">
+            <i class="fas fa-angle-left"></i> Back
+          </a>
+      </div>
 
-    </div>
+</div>
 
 
 <header>
-    <div class="menu" onclick="openNav()">☰</div>
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-lines-vertical"></i></div>
     <div class="right-header">
         <a href="redeem_voucher.php" class="coin-balance">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -412,7 +423,7 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
                 <circle cx="12" cy="12" r="8.2" fill="#F9D66B" />
                 <path d="M8 12c0-2 3-2 4-2s4 0 4 2-3 2-4 2-4 0-4-2z" fill="#D39C12" opacity="0.9"/>
             </svg>
-            <span id="header-balance">₱0</span>
+            <span id="header-balance"> 0</span>
         </a>
         <div class="profile" onclick="window.location.href='user_prof.php'">👤</div>
     </div>
@@ -423,9 +434,9 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
 
 <div class="container">
 
-    <div class="balance-display">
+            <div class="balance-display">
                 <div class="label">Wallet Balance</div>
-                <div class="amount" id="user-balance">₱0.00</div>
+                <div class="amount" id="user-balance"><i class="fas fa-coins"></i> 0.00</div>
             </div>
 
     <div class="card">
@@ -443,60 +454,94 @@ if (!isset($_SESSION['Role']) || $_SESSION['Role'] !== "PASSENGER") {
 </div>
 
 <script>
-     document.getElementById('power-toggle').addEventListener('click', function () {
-    const menu = document.getElementById('power-menu');
-    menu.classList.toggle('hidden');
-  });
-  
-function openNav() { document.getElementById("sidebar").style.width = "280px"; }
-function closeNav() { document.getElementById("sidebar").style.width = "0"; }
+// Hover sidebar functionality
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
 
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
+
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
+// Sidebar navigation functions
+function openNav() { 
+    document.getElementById("sidebar").style.width = "280px"; 
+}
+
+function closeNav() { 
+    document.getElementById("sidebar").style.width = "0"; 
+}
+
+// Notification display function
 function showNotification(id, message) {
-  const box = document.getElementById(id);
-  box.textContent = message;
+    const box = document.getElementById(id);
+    box.textContent = message;
 
-  // Reset animation
-  box.style.display = 'none';
-  box.style.animation = 'none';
-  void box.offsetWidth; // Force reflow
-  box.style.display = 'block';
-  box.style.animation = 'fadeInOut 4s ease forwards';
+    // Reset animation
+    box.style.display = 'none';
+    box.style.animation = 'none';
+    void box.offsetWidth; // Force reflow
+    box.style.display = 'block';
+    box.style.animation = 'fadeInOut 4s ease forwards';
 }
 
 /**
  * Fetches the user's current balance from the server and displays it.
  */
 async function renderUserBalance() {
-    // 1. Immediately update UI to show loading state
-    document.getElementById('user-balance').textContent = 'Loading...';
-    const hb = document.getElementById('header-balance');
-    if (hb) hb.textContent = '...';
+    console.log('Starting renderUserBalance()');
+    
+    const userBalanceElement = document.getElementById('user-balance');
+    const headerBalanceElement = document.getElementById('header-balance');
+    
+    // Show loading state
+    if (userBalanceElement) userBalanceElement.innerHTML = '<i class="fas fa-coins"></i> Loading...';
+    if (headerBalanceElement) headerBalanceElement.textContent = '...';
 
     try {
-        // 2. Fetch data from the AJAX endpoint
+        console.log('Fetching balance from get_passenger_data.php...');
         const res = await fetch('get_passenger_data.php');
+        
+        console.log('Response status:', res.status);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
+        
         const data = await res.json();
+        console.log('Received data:', data);
         
         if (data.success) {
-            const balance = data.user.balance || 0; 
+            let balance = Number(data.user.balance);
+            console.log('Balance value:', balance);
 
-            // 3. Update the HTML elements with dynamic, formatted data
-            document.getElementById('user-balance').textContent = '₱' + parseFloat(balance).toFixed(2);
-            if (hb) hb.textContent = '₱' + parseFloat(balance).toFixed(2);
+            if (userBalanceElement) {
+                userBalanceElement.innerHTML = '<i class="fas fa-coins"></i> ' + balance.toFixed(2);
+            }
+
+            if (headerBalanceElement) {
+                headerBalanceElement.textContent = balance.toFixed(2);
+            }
+            
+            console.log('Balance updated successfully');
         } else {
             // Handle failure
-            document.getElementById('user-balance').textContent = 'Server Error';
-            if (hb) hb.textContent = 'Error';
-            console.error('Failed to load user data:', data.error);
+            console.error('API returned error:', data.error);
+            if (userBalanceElement) userBalanceElement.innerHTML = '<i class="fas fa-coins"></i> Error';
+            if (headerBalanceElement) headerBalanceElement.textContent = 'Error';
         }
     } catch (error) {
-        // 4. Handle Network Error
-        document.getElementById('user-balance').textContent = 'Network Error';
-        if (hb) hb.textContent = 'Err';
+        // Handle Network Error
         console.error('Network error during fetch:', error);
+        if (userBalanceElement) userBalanceElement.innerHTML = '<i class="fas fa-coins"></i> Network Error';
+        if (headerBalanceElement) headerBalanceElement.textContent = 'Err';
     }
 }
 
+// Voucher redemption form handler
 document.getElementById('redeem-form').addEventListener('submit', async e => {
     e.preventDefault();
     
@@ -516,39 +561,38 @@ document.getElementById('redeem-form').addEventListener('submit', async e => {
         });
         const result = await res.json();
         
-         if (result.success) {
-        const successBox = document.getElementById('voucher-success');
-        successBox.textContent = `✅ Voucher redeemed successfully! Added: ₱${parseFloat(result.discount).toFixed(2)} to your balance.`;
+        if (result.success) {
+            const successBox = document.getElementById('voucher-success');
+            successBox.textContent = `✅ Voucher redeemed successfully! Added: ₱${parseFloat(result.discount).toFixed(2)} to your balance.`;
 
-        // Reset animation
-        successBox.style.display = 'none';
-        successBox.style.animation = 'none';
-        void successBox.offsetWidth; // Force reflow
-        successBox.style.display = 'block';
-        successBox.style.animation = 'fadeInOut 4s ease forwards';
+            // Reset animation
+            successBox.style.display = 'none';
+            successBox.style.animation = 'none';
+            void successBox.offsetWidth; // Force reflow
+            successBox.style.display = 'block';
+            successBox.style.animation = 'fadeInOut 4s ease forwards';
 
-        codeInput.value = '';
-        renderUserBalance();
+            codeInput.value = '';
+            // Reload balance after successful redemption
+            renderUserBalance();
         } else {
-        const errorBox = document.getElementById('voucher-error');
-        errorBox.textContent = result.error || '❌ Redemption failed.';
+            const errorBox = document.getElementById('voucher-error');
+            errorBox.textContent = result.error || '❌ Redemption failed.';
 
-        // Reset animation
-        errorBox.style.display = 'none';
-        errorBox.style.animation = 'none';
-        void errorBox.offsetWidth;
-        errorBox.style.display = 'block';
-        errorBox.style.animation = 'fadeInOut 4s ease forwards';
+            // Reset animation
+            errorBox.style.display = 'none';
+            errorBox.style.animation = 'none';
+            void errorBox.offsetWidth;
+            errorBox.style.display = 'block';
+            errorBox.style.animation = 'fadeInOut 4s ease forwards';
         }
-
-
-        } catch (error) {
-            console.error('Network or server error:', error);
-            alert('A network error occurred. Please try again.');
-        } finally {
-            btn.disabled = false;
-        }
-    });
+    } catch (error) {
+        console.error('Network or server error:', error);
+        alert('A network error occurred. Please try again.');
+    } finally {
+        btn.disabled = false;
+    }
+});
 
 // Initial call to load data when the page loads
 renderUserBalance();

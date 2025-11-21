@@ -4,6 +4,7 @@ include("auth.php");
 
 $loginPage = "/SADPROJ/login.php";
 
+
 if (!isset($_SESSION['UserID'])) {
     header("Location: $loginPage");
     exit();
@@ -33,10 +34,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // FIX: Join with users table to get Name and Profile Picture
 // We use LEFT JOIN so legacy feedback (without matching users) still shows up
-$query = "SELECT f.FeedbackID, f.Message, u.FirstName, u.LastName, u.ProfilePictureURL, f.PassengerID 
+$query = "SELECT f.FeedbackID, f.Message, f.DateSubmitted, u.FirstName, u.LastName, u.ProfilePictureURL, f.PassengerID 
           FROM feedback f 
           LEFT JOIN users u ON f.PassengerID = u.UserID 
-          ORDER BY f.FeedbackID DESC";
+          ORDER BY f.DateSubmitted DESC";
+
 $result = $conn->query($query);
 ?>
 
@@ -167,7 +169,7 @@ $result = $conn->query($query);
         left: 0;
         background-color: #1b1b1b;
         overflow: hidden;
-        transition: 0.4s;
+        transition: 0.3s;
         padding-top: 60px;
         z-index: 1000;
         transition: width 0.3s ease, background 0.3s ease;
@@ -180,6 +182,8 @@ $result = $conn->query($query);
         color: #ddd;
         display: block;
         transition: 0.3s;
+        white-space: nowrap; 
+        overflow: hidden;
     }
 
     .sidebar a i {
@@ -203,138 +207,148 @@ $result = $conn->query($query);
         color: white;
     }
 
-     .main-content {
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-    }
-    h2 {
-      text-align: center;
-      margin-top: 0px;
-      margin-bottom: 40px;
-    }
+.main-content {
+  padding: 30px;
+  max-width: 900px;
+  margin: auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    .feedback-box {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      margin-bottom: 30px;
-    }
-    .feedback-box label {
-      display: block;
-      margin: 10px 0 10px;
-      font-weight: bold;
-    }
-    .feedback-box input,
-    .feedback-box textarea {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    width: 100%;
-    min-height: 150px; 
-    padding: 12px; 
-    margin-bottom: 20px; 
-    border: 1px solid #ddd; 
-    border-radius: 8px; 
-    font-size: 15px; 
-    color: #333; 
-    background-color: #f9f9f9; 
-    resize: none; 
-    transition: all 0.2s ease-in-out;
-    }
+/* Headings */
+h2 {
+  text-align: center;
+  margin: 0 0 30px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2e7d32;
+  letter-spacing: 0.5px;
+}
 
-    .feedback-box textarea:focus {
-        border-color: #2e7d32;
-        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.3);
-        background-color: #fff;
-        outline: none;
-    }
-    .feedback-box button {
-      width: 100%;
-      background-color: #0a0a0a;
-      color: #f6f7ec;
-      font-size: 1rem;
-      font-weight: 700;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      color: white;
-      box-shadow: 1px 2px 6px rgba(0,0,0,0.3);
-    }
-    .feedback-box button:hover {
-     background-color: #222;
-    }
+/* Feedback Form */
+.feedback-box {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  margin-bottom: 40px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.feedback-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
 
-    .reviews {
-      margin-top: 10px;
-    }
+.feedback-box label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #444;
+}
 
-    .review {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom right, #e6fce9, #d8fada);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 18px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-      .review:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    }
-    .avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #66bb6a, #2e7d32);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        border: 2px solid #ffffff;
-        flex-shrink: 0;
-        overflow: hidden; /* Ensures image stays within circle */
-    }
+.feedback-box textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #333;
+  background-color: #f9f9f9;
+  resize: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.feedback-box textarea:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46,125,50,0.25);
+  background-color: #fff;
+  outline: none;
+}
 
-    /* Added style for profile image inside avatar */
-    .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+.feedback-box button {
+  width: 100%;
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+.feedback-box button:hover {
+  background: linear-gradient(135deg, #388e3c, #43a047);
+  transform: translateY(-2px);
+}
 
-    .review-content {
-        flex: 1;
-        font-size: 16px;
-        color: #555;
-        line-height: 1.7;
-        margin-left: 15px;
-    }
+/* Reviews Section */
+.reviews {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-    .review-name {
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 4px;
-        color: #2c3e50;
-        transition: color 0.2s ease;
-    }
+.review {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.review:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
 
-    .review-item {
-        display: flex;
-        align-items: flex-start;
-        padding: 20px;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        background-color: #fff;
-    }
+.avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #66bb6a, #2e7d32);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 2px solid #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.review-content {
+  flex: 1;
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.review-name {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  color: #2e7d32;
+  transition: color 0.2s ease;
+}
+.review-name:hover {
+  color: #1b5e20;
+}
+
+.review-message {
+  font-size: 14px;
+  color: #444;
+}
 
 
     .global-map-bg {
@@ -372,7 +386,6 @@ $result = $conn->query($query);
     bottom: 20px;
     left: 0;
     width: 100%;
-    padding: 0 20px;
   }
 
   #power-toggle {
@@ -422,15 +435,202 @@ $result = $conn->query($query);
     display: none;
   }
 
+    .header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+  .page-title {
+ font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #ffffff;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInTransit 1s ease forwards 0.3s;
+}
+
+/* Entry animation: slide in like a train arriving */
+@keyframes slideInTransit {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Icon bounce animation (like wheels turning) */
+@keyframes bounceWheel {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* Glow underline accent like a transit line */
+.page-title::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #2e7d32, #66bb6a, #2196f3);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease;
+}
+
+.page-title:hover::after {
+  transform: scaleX(1);
+}
+
+.review-name span {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2e7d32;
+}
+
+
+#hover-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;     /* hover are width */
+    height: 100vh;
+    z-index: 999;    
+}
+
+
+/* LOGOUT CSS */
+/* Logout Popup Styles */
+.logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.logout-modal {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.logout-icon i {
+  font-size: 32px;
+  color: white;
+}
+
+.logout-modal h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.logout-modal p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.logout-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Buttons */
+.btn-cancel, .btn-confirm {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* CANCEL BUTTON - RED */
+.btn-cancel {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-cancel:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+/* CONFIRM BUTTON - GREEN */
+.btn-confirm {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirm:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
 
   </style>
 </head>
 
 <body>
+
+
+<!-- CONFIRMATION POPUP -->
+<div id="logout-popup" class="logout-overlay" style="display: none;">
+  <div class="logout-modal">
+    <div class="logout-icon"> 
+    </div>
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to logout?</p>
+    <div class="logout-buttons">
+      <button class="btn-cancel" onclick="closeLogoutPopup()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmLogout()">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="hover-zone"></div>
+
       <div class="global-map-bg"></div>
 
       <div id="sidebar" class="sidebar" aria-hidden="true">
-      <span class="closebtn" onclick="closeNav()">&times;</span>
+      <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
       
       <a href="passenger_dashboard.php">
         <i class="fas fa-home"></i> Homepage
@@ -461,20 +661,19 @@ $result = $conn->query($query);
       </a>
 
       <div class="sidebar-power">
-  <button id="power-toggle">
-    <i class="fas fa-sign-out-alt"></i>
-  </button>
-  <div id="power-menu" class="power-menu hidden">
-    <a href="login.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    <a href="Feedback.php"><i class="fas fa-arrow-left"></i> Back</a>
-  </div>
+          <a href="javascript:void(0);" onclick="showLogoutPopup()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+      </div>
 </div>
-    </div>
 
   <header>
-    <div class="menu" onclick="openNav()">☰</div>
+    <div class="header-left">
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-vertical"></i></div>
+    <span class="page-title">Users' Feedback</span> <!-- or App Name -->
+   </div>
     <div class="right-header">
-      <a href="redeem_voucher.php" class="coin-balance">
+      <a href="buyCoin/buy_coins.php" class="coin-balance">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="#F4C542"/>
           <circle cx="12" cy="12" r="8.2" fill="#F9D66B"/>
@@ -514,6 +713,10 @@ $result = $conn->query($query);
           
           // Determine profile image or fallback initial
           $hasProfilePic = !empty($row['ProfilePictureURL']);
+
+          $feedbackDate = !empty($row['DateSubmitted']) 
+          ? date("F j, Y", strtotime($row['DateSubmitted'])) 
+          : '';
       ?>
         <div class="review">
           <div class="avatar">
@@ -523,8 +726,18 @@ $result = $conn->query($query);
                   <?php echo strtoupper(substr($displayName, 0, 1)); ?>
               <?php endif; ?>
           </div>
+
+          
           <div class="review-content">
-            <div class="review-name"><?php echo $displayName; ?></div>
+            <div class="review-name">
+            <?php echo $displayName; ?>
+            <?php if ($feedbackDate): ?>
+              <span style="font-size: 0.85rem; color: #666; margin-left: 10px;">
+                • <?php echo $feedbackDate; ?>
+              </span>
+            <?php endif; ?>
+            </div>
+
             <div class="review-message"><?php echo htmlspecialchars($row['Message']); ?></div>
           </div>
         </div>
@@ -537,10 +750,40 @@ $result = $conn->query($query);
   </div>
 
   <script>
-       document.getElementById('power-toggle').addEventListener('click', function () {
-    const menu = document.getElementById('power-menu');
-    menu.classList.toggle('hidden');
-  });
+
+// hover sidebar
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
+
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
+
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
+
+        // Wait until the DOM is fully loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            // Grab the toggle button and the menu
+            const powerToggle = document.getElementById("power-toggle");
+            const powerMenu = document.getElementById("power-menu");
+
+            // Add a click event listener to the button
+            powerToggle.addEventListener("click", function () {
+            // Toggle the "hidden" class on the menu
+            powerMenu.classList.toggle("hidden");
+            });
+
+            // Optional: close menu if user clicks outside
+            document.addEventListener("click", function (event) {
+            if (!powerMenu.contains(event.target) && !powerToggle.contains(event.target)) {
+                powerMenu.classList.add("hidden");
+            }
+            });
+        });
+
   
 
     async function renderUserBalance() {
@@ -569,6 +812,34 @@ $result = $conn->query($query);
       sb.style.width = '0';
       sb.setAttribute('aria-hidden','true');
     }
+
+
+// CONFIRMATION POPUP FUNCTION
+// Logout popup functions
+function showLogoutPopup() {
+  document.getElementById('logout-popup').style.display = 'flex';
+  // Close sidebar when showing popup
+  closeNav();
+}
+
+function closeLogoutPopup() {
+  document.getElementById('logout-popup').style.display = 'none';
+}
+
+function confirmLogout() {
+  // Redirect to logout/login page
+  window.location.href = 'login.php';
+}
+
+// Close popup when clicking outside the modal
+document.addEventListener('click', function(event) {
+  const popup = document.getElementById('logout-popup');
+  const modal = document.querySelector('.logout-modal');
+  
+  if (event.target === popup) {
+    closeLogoutPopup();
+  }
+});
   </script>
 </body>
 </html>

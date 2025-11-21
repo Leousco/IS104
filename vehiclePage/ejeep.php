@@ -48,7 +48,7 @@ require_once '../config.php';
         left: 0;
         background-color: #1b1b1b;
         overflow: hidden;
-        transition: 0.4s;
+        transition: 0.3s;
         padding-top: 60px;
         z-index: 1000;
         transition: width 0.3s ease, background 0.3s ease;
@@ -61,6 +61,8 @@ require_once '../config.php';
         color: #ddd;
         display: block;
         transition: 0.3s;
+        white-space: nowrap;
+        overflow: hidden;
     }
 
     /* 2. Style the Icon element */
@@ -105,18 +107,36 @@ input[type="checkbox"].routeCheckbox:hover {
   transform: scale(1.2);
 }
 
+.sidebar-power {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+}
+
+#hover-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;     /* hover are width */
+    height: 100vh;
+    z-index: 999;    
+}
+
   </style>
 </head>
 <body>
 
+<div id="hover-zone"></div>
+
 <header>
 
-    <div class="menu" onclick="openNav()">☰</div>
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-lines-vertical"></i></div>
     <div class="profile" onclick="location.href='../login.php'">👤</div>
   </header>
 
  <div id="sidebar" class="sidebar" aria-hidden="true">
-  <span class="closebtn" onclick="closeNav()">&times;</span>
+  <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
   
   <a href="../passenger_dashboard.php">
     <i class="fas fa-home"></i> Homepage
@@ -153,6 +173,13 @@ input[type="checkbox"].routeCheckbox:hover {
   <a href="../discountPage/discount_page.php">
     <i class="fas fa-percent"></i> Apply for a Discount
   </a>
+
+  <div class="sidebar-power">
+          <a href="../vehicle.php">
+            <i class="fas fa-angle-left"></i> Back
+          </a>
+      </div>
+
 </div>
 
 <!-- MAIN -->
@@ -226,6 +253,19 @@ input[type="checkbox"].routeCheckbox:hover {
 </div>
 
 <script>
+
+// hover sidebar
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
+
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
+
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
   
 // Sidebar
 function openNav(){

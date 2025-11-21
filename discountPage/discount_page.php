@@ -60,6 +60,7 @@ function isDisabled($category) {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f7fa;
             color: #333;
+            overflow: hidden;
         }
 
         body::-webkit-scrollbar {
@@ -141,7 +142,7 @@ function isDisabled($category) {
             left: 0;
             background-color: #1b1b1b;
             overflow: hidden;
-            transition: 0.4s;
+            transition: 0.3s;
             padding-top: 60px;
             z-index: 1000;
             transition: width 0.3s ease, background 0.3s ease;
@@ -153,6 +154,8 @@ function isDisabled($category) {
             color: #ddd;
             display: block;
             transition: 0.3s;
+            white-space: nowrap;
+            overflow: hidden;
         }
         .sidebar a i {
             width: 10px;
@@ -257,18 +260,197 @@ function isDisabled($category) {
         .page-title:hover::after {
           transform: scaleX(1);
         }
+
+            .sidebar-power {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+  }
+
+  #power-toggle {
+    background: none;
+    border: none;
+    color: #ddd;
+    font-size: 20px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+  }
+
+  #power-toggle:hover {
+    color: #2e7d32;
+  }
+
+  .power-menu {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .power-menu a {
+    font-size: 18px;
+    color: #ddd;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+  }
+
+  .power-menu a i {
+    width: 25px;
+    margin-right: 10px;
+    text-align: center;
+  }
+
+  .power-menu a:hover {
+    background: #2e7d32;
+    color: #fff;
+    padding-left: 7px;
+    border-radius: 6px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  #hover-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;     /* hover are width */
+    height: 100vh;
+    z-index: 999;    
+}
+
+
+/* LOGOUT CSS */
+/* Logout Popup Styles */
+.logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.logout-modal {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.logout-icon i {
+  font-size: 32px;
+  color: white;
+}
+
+.logout-modal h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.logout-modal p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.logout-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Buttons */
+.btn-cancel, .btn-confirm {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* CANCEL BUTTON - RED */
+.btn-cancel {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-cancel:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+/* CONFIRM BUTTON - GREEN */
+.btn-confirm {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirm:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
   </style>
 </head>
 <body>
 
+<!-- CONFIRMATION POPUP -->
+<div id="logout-popup" class="logout-overlay" style="display: none;">
+  <div class="logout-modal">
+    <div class="logout-icon"> 
+    </div>
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to logout?</p>
+    <div class="logout-buttons">
+      <button class="btn-cancel" onclick="closeLogoutPopup()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmLogout()">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
+<div id="hover-zone"></div>
+
   <!-- HEADER -->
   <header>
   <div class="header-left">
-    <div class="menu" onclick="openNav()">☰</div>
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-lines-vertical"></i></div>
     <span class="page-title">Application for discount</span> <!-- or App Name -->
    </div>
     <div class="right-header">
-      <a href="../redeem_voucher.php" class="coin-balance">
+      <a href="../buyCoin/buy_coins.php" class="coin-balance">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="#F4C542" />
@@ -284,7 +466,7 @@ function isDisabled($category) {
 
   <!-- SIDEBAR -->
   <div id="sidebar" class="sidebar" aria-hidden="true">
-    <span class="closebtn" onclick="closeNav()">&times;</span>
+    <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
     
     <a href="../passenger_dashboard.php">
       <i class="fas fa-home"></i> Homepage
@@ -313,11 +495,19 @@ function isDisabled($category) {
     <a href="discount_page.php">
       <i class="fas fa-percent"></i> Apply for a Discount
     </a>
+
+    <div class="sidebar-power">
+          <a href="javascript:void(0);" onclick="showLogoutPopup()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+      </div>
+
   </div>
 
+<main id="main-content" class="flex flex-col items-center justify-center p-6 bg-gray-50 min-h-screen">
   <!-- MAIN CONTENT -->
-  <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
-    <h1 class="text-2xl font-bold mb-2">APPLY FOR DISCOUNT</h1>
+  <div class="flex flex-col items-center bg-gray-50 p-6">
+    <h1 class="text-2xl font-bold mb-2">APPLY FOR A DISCOUNT</h1>
     <p class="text-gray-600 mb-4 text-center">
       Choose the discount category and submit your required ID.
     </p>
@@ -400,9 +590,24 @@ function isDisabled($category) {
 
     </div>
   </div>
+</main>
 
   <!-- JS -->
-  <script>
+<script>
+
+// hover sidebar
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
+
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
+
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
+
     async function renderUserBalance() {
       const hb = document.getElementById('header-balance');
       hb.textContent = '...';
@@ -425,6 +630,55 @@ function isDisabled($category) {
     function closeNav() {
       document.getElementById("sidebar").style.width = "0";
     }
+
+
+            // Wait until the DOM is fully loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            // Grab the toggle button and the menu
+            const powerToggle = document.getElementById("power-toggle");
+            const powerMenu = document.getElementById("power-menu");
+
+            // Add a click event listener to the button
+            powerToggle.addEventListener("click", function () {
+            // Toggle the "hidden" class on the menu
+            powerMenu.classList.toggle("hidden");
+            });
+
+            // Optional: close menu if user clicks outside
+            document.addEventListener("click", function (event) {
+            if (!powerMenu.contains(event.target) && !powerToggle.contains(event.target)) {
+                powerMenu.classList.add("hidden");
+            }
+            });
+        });
+
+
+// CONFIRMATION POPUP FUNCTION
+// Logout popup functions
+function showLogoutPopup() {
+  document.getElementById('logout-popup').style.display = 'flex';
+  // Close sidebar when showing popup
+  closeNav();
+}
+
+function closeLogoutPopup() {
+  document.getElementById('logout-popup').style.display = 'none';
+}
+
+function confirmLogout() {
+  // Redirect to logout/login page
+  window.location.href = '../login.php';
+}
+
+// Close popup when clicking outside the modal
+document.addEventListener('click', function(event) {
+  const popup = document.getElementById('logout-popup');
+  const modal = document.querySelector('.logout-modal');
+  
+  if (event.target === popup) {
+    closeLogoutPopup();
+  }
+});
   </script>
 
 </body>

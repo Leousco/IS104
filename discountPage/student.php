@@ -90,7 +90,7 @@ $conn->close();
         left: 0;
         background-color: #1b1b1b;
         overflow: hidden;
-        transition: 0.4s;
+        transition: 0.3s;
         padding-top: 60px;
         z-index: 1000;
         transition: width 0.3s ease, background 0.3s ease;
@@ -103,6 +103,8 @@ $conn->close();
         color: #ddd;
         display: block;
         transition: 0.3s;
+        white-space: nowrap;
+        overflow: hidden;
     }
 
     .sidebar a i {
@@ -119,7 +121,7 @@ $conn->close();
 
     .sidebar .closebtn {
         position: absolute;
-        top: 10px;
+        top: 25px;
         right: 20px;
         font-size: 30px;
         cursor: pointer;
@@ -197,25 +199,90 @@ $conn->close();
 
       .page-title:hover::after {
         transform: scaleX(1);
-      }    
+      }
+      
+  .sidebar-power {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+  }
 
+  #power-toggle {
+    background: none;
+    border: none;
+    color: #ddd;
+    font-size: 20px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+  }
+
+  #power-toggle:hover {
+    color: #2e7d32;
+  }
+
+  .power-menu {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .power-menu a {
+    font-size: 18px;
+    color: #ddd;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+  }
+
+  .power-menu a i {
+    width: 25px;
+    margin-right: 10px;
+    text-align: center;
+  }
+
+  .power-menu a:hover {
+    background: #2e7d32;
+    color: #fff;
+    padding-left: 7px;
+    border-radius: 6px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+
+  #hover-zone {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;     /* hover are width */
+    height: 100vh;
+    z-index: 999;    
+}
 
 </style>
 
 </head>
 
 <body>
+
+<div id="hover-zone"></div>
    
 <header>
       <div class="header-left">
-    <div class="menu" onclick="openNav()">☰</div>
-    <span class="page-title">Student VERIFCATION</span> <!-- or App Name -->
+    <div class="menu" onclick="openNav()"><i class="fas fa-grip-lines-vertical"></i></div>
+    <span class="page-title">Student VERIFiCATION</span> <!-- or App Name -->
   </div>
     <div class="profile" onclick="location.href='../user_prof.php'">👤</div>
 </header>
 
   <div id="sidebar" class="sidebar" aria-hidden="true">
-  <span class="closebtn" onclick="closeNav()">&times;</span>
+  <span class="closebtn" onclick="closeNav()"><i class="fas fa-caret-right" style="font-size: 20px;"></i></span>
   
   <a href="../passenger_dashboard.php">
     <i class="fas fa-home"></i> Homepage
@@ -244,6 +311,13 @@ $conn->close();
   <a href="discount_page.php">
     <i class="fas fa-percent"></i> Apply for a Discount
   </a>
+
+  <div class="sidebar-power">
+          <a href="discount_page.php">
+            <i class="fas fa-angle-left"></i> Back
+          </a>
+      </div>
+
 </div>
 
 <!-- MAIN CONTENT -->
@@ -391,6 +465,38 @@ $conn->close();
 
 
 <script>
+
+const sidebar = document.getElementById("sidebar");
+const hoverZone = document.getElementById("hover-zone");
+
+hoverZone.addEventListener("mouseenter", () => {
+    sidebar.style.width = "280px";
+});
+
+sidebar.addEventListener("mouseleave", () => {
+    sidebar.style.width = "0";
+});
+
+            // Wait until the DOM is fully loaded
+        document.addEventListener("DOMContentLoaded", function () {
+            // Grab the toggle button and the menu
+            const powerToggle = document.getElementById("power-toggle");
+            const powerMenu = document.getElementById("power-menu");
+
+            // Add a click event listener to the button
+            powerToggle.addEventListener("click", function () {
+            // Toggle the "hidden" class on the menu
+            powerMenu.classList.toggle("hidden");
+            });
+
+            // Optional: close menu if user clicks outside
+            document.addEventListener("click", function (event) {
+            if (!powerMenu.contains(event.target) && !powerToggle.contains(event.target)) {
+                powerMenu.classList.add("hidden");
+            }
+            });
+        });
+
 function openNav() {
   document.getElementById("sidebar").style.width = "280px";
 }
